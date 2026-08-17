@@ -125,7 +125,7 @@ tp-arquitectura-web/
 
 ## 7. Documentación de la API
 
-Versión lista para exportar a PDF: [`docs/api.md`](docs/api.md).
+Versión completa: [`docs/api.md`](docs/api.md). Para el entregable en PDF que pide la actividad del módulo 2, abrir [`docs/api.html`](docs/api.html) en el navegador y usar `Ctrl+P` → *Guardar como PDF*: ese archivo es el mismo documento con estilos de impresión, tamaño A4 y las tablas ajustadas para que no se corten entre páginas.
 
 **URL base**: `http://localhost:3000`  ·  **Prefijo**: `/api/v1`  ·  **Formato**: JSON (`application/json`)
 

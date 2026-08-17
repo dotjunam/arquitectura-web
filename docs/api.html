@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Documentacion de la API - TP Arquitectura Web</title>
+<style>
+@page { size: A4; margin: 18mm 16mm; }
+* { box-sizing: border-box; }
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 10.5pt; line-height: 1.5; color: #1a1a1a;
+  max-width: 190mm; margin: 0 auto; padding: 12mm 0;
+}
+h1 { font-size: 20pt; margin: 0 0 4pt; border-bottom: 2px solid #1a1a1a; padding-bottom: 6pt; }
+h2 { font-size: 14pt; margin: 22pt 0 8pt; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 16pt 0 6pt; page-break-after: avoid;
+     background: #f2f2f2; padding: 5pt 7pt; border-left: 3px solid #555; }
+h4 { font-size: 10.5pt; margin: 12pt 0 4pt; page-break-after: avoid; }
+p { margin: 6pt 0; }
+hr { border: 0; border-top: 1px solid #d0d0d0; margin: 16pt 0; }
+ul, ol { margin: 6pt 0; padding-left: 20pt; }
+li { margin: 2pt 0; }
+a { color: #1a1a1a; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: 9pt;
+  background: #f2f2f2; padding: 1pt 3pt; border-radius: 2px;
+}
+pre {
+  background: #f7f7f7; border: 1px solid #e0e0e0; border-radius: 3px;
+  padding: 8pt 10pt; overflow-x: auto; page-break-inside: avoid; margin: 8pt 0;
+}
+pre code { background: none; padding: 0; font-size: 8.5pt; line-height: 1.45; }
+table {
+  border-collapse: collapse; width: 100%; margin: 8pt 0;
+  font-size: 9pt; page-break-inside: avoid;
+}
+th, td { border: 1px solid #ccc; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: #ececec; font-weight: 600; }
+tr:nth-child(even) td { background: #fafafa; }
+@media print { body { padding: 0; } a { text-decoration: none; } }
+</style>
+</head>
+<body>
+<h1>Documentación de la API</h1>
+<p><strong>Actividad individual, módulo 2. Arquitectura Web, Universidad de Palermo, 2do cuatrimestre 2026.</strong> Alumno: junam · Profesor: Ing. Diego Marafetti</p>
+<hr>
+<h2>1. Descripción general del backend</h2>
+<p>El backend expone una <strong>API REST para administrar un catálogo personal de películas y series</strong>.</p>
+<p>El dominio que resuelve es la <strong>gestión de una lista de títulos por ver y ya vistos</strong>. El problema es el de cualquiera que acumula pendientes repartidos entre varias plataformas y termina sin saber qué tiene, cuánto le falta ni cuánto tiempo le llevaría. La API centraliza el catálogo y responde esas preguntas.</p>
+<p>Las operaciones que ofrece son:</p>
+<ul><li><strong>CRUD completo de títulos</strong>: alta, consulta individual, listado, reemplazo total, modificación parcial y baja.</li><li><strong>Consulta filtrada del catálogo</strong> por tipo, género, director, idioma, estado de visionado, puntaje mínimo, rango de años y búsqueda por texto, con orden y paginado.</li><li><strong>Consulta de géneros y directores</strong>, derivados de los títulos cargados.</li><li><strong>Dos reportes</strong>: estadísticas de visionado y puntaje promedio por género.</li></ul>
+<p>El recurso central es el <strong>título</strong>, que puede ser una <strong>película</strong> (<code>movie</code>) o una <strong>serie</strong> (<code>series</code>). La distinción sostiene las reglas de negocio: una serie declara temporadas y episodios, una película no, y el cálculo de horas de un reporte los trata distinto.</p>
+<p>Los datos iniciales son <strong>45 títulos (35 películas y 10 series)</strong>, con 16 géneros y 31 directores, cargados automáticamente al iniciar el servidor.</p>
+<p>La implementación es Node.js con Express, con persistencia en memoria detrás de un repositorio. El diseño corresponde al <strong>nivel 2 del modelo de madurez de Richardson</strong>: cada recurso tiene su URL, el verbo indica la operación y el status code indica el resultado.</p>
+<hr>
+<h2>2. Convenciones generales</h2>
+<p><strong>URL base</strong>: <code>http://localhost:3000</code> <strong>Prefijo de la API</strong>: <code>/api/v1</code> <strong>Formato</strong>: JSON (<code>application/json</code>) en pedidos y respuestas.</p>
+<h3>Estructura de las respuestas</h3>
+<p>Las respuestas exitosas devuelven el resultado dentro de <code>data</code>. Los listados agregan <code>meta</code> con la información de paginado.</p>
+<pre class="lang-json"><code>{
+  &quot;data&quot;: [ { &quot;id&quot;: 5, &quot;title&quot;: &quot;Inception&quot;, &quot;type&quot;: &quot;movie&quot;, &quot;year&quot;: 2010 } ],
+  &quot;meta&quot;: { &quot;total&quot;: 45, &quot;page&quot;: 1, &quot;limit&quot;: 20, &quot;pages&quot;: 3 }
+}</code></pre>
+<p>Todos los errores comparten el mismo formato:</p>
+<pre class="lang-json"><code>{
+  &quot;error&quot;: {
+    &quot;status&quot;: 422,
+    &quot;code&quot;: &quot;UNPROCESSABLE_ENTITY&quot;,
+    &quot;message&quot;: &quot;El titulo no cumple las reglas del catalogo.&quot;,
+    &quot;details&quot;: [ { &quot;field&quot;: &quot;seasons&quot;, &quot;message&quot;: &quot;una pelicula no tiene temporadas&quot; } ]
+  }
+}</code></pre>
+<p>El campo <code>details</code> aparece solo cuando hay información por campo.</p>
+<h3>Respuestas comunes a todos los endpoints</h3>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>404 Not Found</code></td><td>La ruta pedida no existe en la API</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>La ruta existe pero no acepta ese verbo. La respuesta incluye el header <code>Allow</code> con los verbos aceptados</td></tr><tr><td><code>413 Payload Too Large</code></td><td>El cuerpo del pedido supera los 100 kB (solo en endpoints con body)</td></tr><tr><td><code>500 Internal Server Error</code></td><td>Error inesperado del servidor</td></tr></tbody></table>
+<h3>Orden en que se validan los pedidos</h3>
+<p>Cuando un pedido tiene más de un problema, el status code que se devuelve es el del primer control que falla. El orden es:</p>
+<ol><li><strong><code>400</code></strong> si el cuerpo no es JSON válido, o <strong><code>413</code></strong> si supera el tamaño máximo.</li><li><strong><code>400</code></strong> si el <code>{id}</code> de la URL no es un número entero.</li><li><strong><code>415</code></strong> si el <code>Content-Type</code> no es <code>application/json</code>.</li><li><strong><code>404</code></strong> si el título indicado no existe.</li><li><strong><code>400</code></strong> si algún campo del cuerpo es inválido, falta, o es desconocido.</li><li><strong><code>409</code></strong> si ya existe otro título con el mismo nombre y año.</li><li><strong><code>422</code></strong> si el cuerpo viola una regla de negocio.</li></ol>
+<hr>
+<h2>3. El recurso Título</h2>
+<table><thead><tr><th>Campo</th><th>Tipo</th><th>Obligatorio</th><th>Reglas</th></tr></thead><tbody><tr><td><code>id</code></td><td>entero</td><td>lo asigna el servidor</td><td>Enviarlo en el body devuelve <code>400</code></td></tr><tr><td><code>title</code></td><td>texto</td><td>sí</td><td>Entre 1 y 200 caracteres. Junto con <code>year</code> forma la identidad del título y no se puede repetir</td></tr><tr><td><code>type</code></td><td>texto</td><td>sí</td><td>Solo <code>movie</code> o <code>series</code></td></tr><tr><td><code>director</code></td><td>texto</td><td>sí</td><td>Entre 2 y 120 caracteres</td></tr><tr><td><code>year</code></td><td>entero</td><td>sí</td><td>Entre 1888 (el primer largometraje conocido) y el año actual más 5, para admitir estrenos ya anunciados</td></tr><tr><td><code>genres</code></td><td>lista de texto</td><td>sí</td><td>Entre 1 y 5 géneros, sin repetidos, hasta 40 caracteres cada uno</td></tr><tr><td><code>runtimeMinutes</code></td><td>entero</td><td>sí</td><td>Entre 1 y 1000. En una serie representa la <strong>duración promedio de un episodio</strong></td></tr><tr><td><code>seasons</code></td><td>entero o <code>null</code></td><td>no</td><td>Entre 1 y 100. Obligatorio si <code>type</code> es <code>series</code>, prohibido si es <code>movie</code>. Por defecto <code>null</code></td></tr><tr><td><code>episodes</code></td><td>entero o <code>null</code></td><td>no</td><td>Entre 1 y 10000. Obligatorio si <code>type</code> es <code>series</code>, prohibido si es <code>movie</code>. Por defecto <code>null</code></td></tr><tr><td><code>language</code></td><td>texto</td><td>no</td><td>Código ISO de dos letras minúsculas (<code>es</code>, <code>en</code>, <code>ja</code>). Por defecto <code>en</code></td></tr><tr><td><code>watched</code></td><td>booleano</td><td>no</td><td>Por defecto <code>false</code></td></tr><tr><td><code>rating</code></td><td>entero o <code>null</code></td><td>no</td><td>Entre 1 y 10. Solo se admite si <code>watched</code> es <code>true</code>. Por defecto <code>null</code></td></tr><tr><td><code>watchedOn</code></td><td>texto o <code>null</code></td><td>no</td><td>Fecha <code>AAAA-MM-DD</code> existente y no futura. Solo se admite si <code>watched</code> es <code>true</code>. Por defecto <code>null</code></td></tr></tbody></table>
+<h3>Reglas de negocio</h3>
+<p>Estas reglas se verifican después de la validación de forma y devuelven <code>422</code>:</p>
+<ol><li>Un título de tipo <code>series</code> tiene que declarar <code>seasons</code> y <code>episodes</code>.</li><li>Un título de tipo <code>movie</code> no puede declarar <code>seasons</code> ni <code>episodes</code>.</li><li>No se puede puntuar (<code>rating</code>) un título que no está marcado como visto.</li><li>No se puede fechar (<code>watchedOn</code>) un título que no está marcado como visto.</li><li><code>watchedOn</code> no puede ser una fecha futura.</li></ol>
+<p>Ejemplos de un título de cada tipo:</p>
+<pre class="lang-json"><code>{
+  &quot;id&quot;: 5,
+  &quot;title&quot;: &quot;Inception&quot;,
+  &quot;type&quot;: &quot;movie&quot;,
+  &quot;director&quot;: &quot;Christopher Nolan&quot;,
+  &quot;year&quot;: 2010,
+  &quot;genres&quot;: [&quot;Action&quot;, &quot;Sci-Fi&quot;, &quot;Thriller&quot;],
+  &quot;runtimeMinutes&quot;: 148,
+  &quot;seasons&quot;: null,
+  &quot;episodes&quot;: null,
+  &quot;language&quot;: &quot;en&quot;,
+  &quot;watched&quot;: true,
+  &quot;rating&quot;: 9,
+  &quot;watchedOn&quot;: &quot;2024-05-11&quot;
+}</code></pre>
+<pre class="lang-json"><code>{
+  &quot;id&quot;: 36,
+  &quot;title&quot;: &quot;Breaking Bad&quot;,
+  &quot;type&quot;: &quot;series&quot;,
+  &quot;director&quot;: &quot;Vince Gilligan&quot;,
+  &quot;year&quot;: 2008,
+  &quot;genres&quot;: [&quot;Crime&quot;, &quot;Drama&quot;, &quot;Thriller&quot;],
+  &quot;runtimeMinutes&quot;: 49,
+  &quot;seasons&quot;: 5,
+  &quot;episodes&quot;: 62,
+  &quot;language&quot;: &quot;en&quot;,
+  &quot;watched&quot;: true,
+  &quot;rating&quot;: 10,
+  &quot;watchedOn&quot;: &quot;2025-02-22&quot;
+}</code></pre>
+<hr>
+<h2>4. Endpoints</h2>
+<h3>4.1. <code>GET /</code></h3>
+<p><strong>Propósito</strong>: índice de la API. Devuelve el nombre, la versión y la lista de rutas disponibles, para que un cliente pueda descubrir el resto sin leer la documentación.</p>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>Siempre</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Cualquier verbo que no sea <code>GET</code>. Header <code>Allow: GET</code></td></tr></tbody></table>
+<hr>
+<h3>4.2. <code>GET /api/v1/health</code></h3>
+<p><strong>Propósito</strong>: verificar que el servicio está vivo. Informa hace cuántos segundos está corriendo y cuántos títulos cargó el seed.</p>
+<pre class="lang-json"><code>{ &quot;status&quot;: &quot;ok&quot;, &quot;uptimeSeconds&quot;: 12, &quot;seededTitles&quot;: 45 }</code></pre>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>El servicio responde</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Cualquier verbo que no sea <code>GET</code>. Header <code>Allow: GET</code></td></tr></tbody></table>
+<hr>
+<h3>4.3. <code>GET /api/v1/titles</code></h3>
+<p><strong>Propósito</strong>: listar los títulos del catálogo. Acepta filtros, orden y paginado, todos opcionales y combinables entre sí.</p>
+<p><strong>Parámetros de consulta</strong> (query string):</p>
+<table><thead><tr><th>Parámetro</th><th>Valores</th><th>Por defecto</th><th>Qué hace</th></tr></thead><tbody><tr><td><code>type</code></td><td><code>movie</code> / <code>series</code></td><td>—</td><td>Filtra por tipo de título</td></tr><tr><td><code>genre</code></td><td>texto</td><td>—</td><td>Filtra por un género, sin distinguir mayúsculas</td></tr><tr><td><code>director</code></td><td>texto</td><td>—</td><td>Filtra por coincidencia parcial en el director</td></tr><tr><td><code>language</code></td><td>texto</td><td>—</td><td>Filtra por código de idioma</td></tr><tr><td><code>watched</code></td><td><code>true</code> / <code>false</code></td><td>—</td><td>Filtra por vistos o pendientes</td></tr><tr><td><code>minRating</code></td><td>entero de 1 a 10</td><td>—</td><td>Deja solo los títulos con puntaje mayor o igual. Los no puntuados quedan afuera</td></tr><tr><td><code>yearFrom</code></td><td>entero ≥ 1888</td><td>—</td><td>Año de estreno mínimo</td></tr><tr><td><code>yearTo</code></td><td>entero ≥ 1888</td><td>—</td><td>Año de estreno máximo</td></tr><tr><td><code>q</code></td><td>texto, mínimo 2 caracteres</td><td>—</td><td>Busca el texto en el título o en el director</td></tr><tr><td><code>sort</code></td><td><code>id</code>, <code>title</code>, <code>year</code>, <code>rating</code>, <code>runtimeMinutes</code></td><td><code>id</code></td><td>Campo por el que se ordena</td></tr><tr><td><code>order</code></td><td><code>asc</code> / <code>desc</code></td><td><code>asc</code></td><td>Sentido del orden</td></tr><tr><td><code>page</code></td><td>entero ≥ 1</td><td><code>1</code></td><td>Página a devolver</td></tr><tr><td><code>limit</code></td><td>entero entre 1 y 100</td><td><code>20</code></td><td>Cantidad de títulos por página</td></tr></tbody></table>
+<p>Al ordenar por <code>rating</code>, los títulos sin puntaje quedan siempre al final, sea cual sea el sentido del orden.</p>
+<p>Ejemplo: <code>GET /api/v1/titles?watched=false&amp;sort=runtimeMinutes&amp;limit=5</code></p>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>El listado se resolvió, aun si ningún título coincide (en ese caso <code>data</code> es un arreglo vacío y <code>meta.total</code> es 0)</td></tr><tr><td><code>400 Bad Request</code></td><td>Un parámetro tiene un valor inválido: <code>type</code> distinto de <code>movie</code>/<code>series</code>, <code>sort</code> con un campo que no existe, <code>order</code> distinto de <code>asc</code>/<code>desc</code>, <code>page</code>, <code>limit</code>, <code>minRating</code>, <code>yearFrom</code> o <code>yearTo</code> no enteros o fuera de rango, <code>watched</code> distinto de <code>true</code>/<code>false</code>, o <code>q</code> con menos de 2 caracteres</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Verbos distintos de <code>GET</code> y <code>POST</code>. Header <code>Allow: GET, POST</code></td></tr></tbody></table>
+<hr>
+<h3>4.4. <code>POST /api/v1/titles</code></h3>
+<p><strong>Propósito</strong>: agregar un título al catálogo. El servidor asigna el <code>id</code> y devuelve el recurso creado junto con su ubicación en el header <code>Location</code>.</p>
+<p><strong>Cuerpo esperado</strong> (los campos opcionales se pueden omitir y toman su valor por defecto):</p>
+<pre class="lang-json"><code>{
+  &quot;title&quot;: &quot;Perfect Days&quot;,
+  &quot;type&quot;: &quot;movie&quot;,
+  &quot;director&quot;: &quot;Wim Wenders&quot;,
+  &quot;year&quot;: 2023,
+  &quot;genres&quot;: [&quot;Drama&quot;],
+  &quot;runtimeMinutes&quot;: 124,
+  &quot;language&quot;: &quot;ja&quot;
+}</code></pre>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>201 Created</code></td><td>El título se creó. Devuelve el recurso completo y el header <code>Location</code> con su URL</td></tr><tr><td><code>400 Bad Request</code></td><td>El JSON está mal formado, falta un campo obligatorio, un tipo no corresponde, <code>type</code> está fuera del enum, <code>genres</code> viene vacío o con repetidos, la fecha no existe en el calendario, hay un campo desconocido, o se envió <code>id</code> en el cuerpo</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Verbos distintos de <code>GET</code> y <code>POST</code>. Header <code>Allow: GET, POST</code></td></tr><tr><td><code>409 Conflict</code></td><td>Ya existe otro título con el mismo <code>title</code> y el mismo <code>year</code></td></tr><tr><td><code>413 Payload Too Large</code></td><td>El cuerpo supera los 100 kB</td></tr><tr><td><code>415 Unsupported Media Type</code></td><td>El <code>Content-Type</code> no es <code>application/json</code></td></tr><tr><td><code>422 Unprocessable Entity</code></td><td>El cuerpo es válido en su forma pero viola una regla de negocio: una película con <code>seasons</code> o <code>episodes</code>, una serie sin ellos, un <code>rating</code> o un <code>watchedOn</code> sobre un título no visto, o una fecha de visionado futura</td></tr></tbody></table>
+<p><strong>No es idempotente</strong>: dos pedidos idénticos crearían dos títulos, salvo que el par <code>title</code> + <code>year</code> repetido lo impida con un <code>409</code>.</p>
+<hr>
+<h3>4.5. <code>GET /api/v1/titles/{id}</code></h3>
+<p><strong>Propósito</strong>: obtener un título puntual por su identificador.</p>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>El título existe. Devuelve el recurso completo</td></tr><tr><td><code>400 Bad Request</code></td><td>El <code>{id}</code> de la URL no es un número entero (ej. <code>/titles/abc</code>)</td></tr><tr><td><code>404 Not Found</code></td><td>No existe ningún título con ese id</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Verbos distintos de <code>GET</code>, <code>PUT</code>, <code>PATCH</code> y <code>DELETE</code>. Header <code>Allow: GET, PUT, PATCH, DELETE</code></td></tr></tbody></table>
+<hr>
+<h3>4.6. <code>PUT /api/v1/titles/{id}</code></h3>
+<p><strong>Propósito</strong>: reemplazar un título completo. Hay que enviar el recurso entero: los campos opcionales que se omitan <strong>vuelven a su valor por defecto</strong>, no conservan el valor anterior. Para cambiar solo algunos campos, usar <code>PATCH</code>.</p>
+<p><strong>Cuerpo esperado</strong>: el mismo del <code>POST</code>, sin el <code>id</code> (viaja en la URL).</p>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>El título se reemplazó. Devuelve el recurso actualizado</td></tr><tr><td><code>400 Bad Request</code></td><td>El <code>{id}</code> no es un entero, el JSON está mal formado, falta un campo obligatorio, un tipo no corresponde, hay un campo desconocido, o se envió <code>id</code> en el cuerpo</td></tr><tr><td><code>404 Not Found</code></td><td>No existe ningún título con ese id. <strong>No crea el recurso</strong>: los identificadores los asigna el servidor</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Verbos distintos de <code>GET</code>, <code>PUT</code>, <code>PATCH</code> y <code>DELETE</code>. Header <code>Allow: GET, PUT, PATCH, DELETE</code></td></tr><tr><td><code>409 Conflict</code></td><td>El <code>title</code> y <code>year</code> enviados ya los usa otro título</td></tr><tr><td><code>413 Payload Too Large</code></td><td>El cuerpo supera los 100 kB</td></tr><tr><td><code>415 Unsupported Media Type</code></td><td>El <code>Content-Type</code> no es <code>application/json</code></td></tr><tr><td><code>422 Unprocessable Entity</code></td><td>Alguna de las cinco reglas de negocio no se cumple</td></tr></tbody></table>
+<p><strong>Es idempotente</strong>: repetir el mismo pedido deja el recurso en el mismo estado.</p>
+<hr>
+<h3>4.7. <code>PATCH /api/v1/titles/{id}</code></h3>
+<p><strong>Propósito</strong>: modificar parcialmente un título. Solo viajan los campos que cambian; el resto queda como estaba. Es el verbo natural para el uso más común del catálogo: marcar algo como visto y puntuarlo.</p>
+<p><strong>Cuerpo esperado</strong>: un objeto con al menos un campo del recurso.</p>
+<pre class="lang-json"><code>{ &quot;watched&quot;: true, &quot;rating&quot;: 9, &quot;watchedOn&quot;: &quot;2026-08-17&quot; }</code></pre>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>El título se modificó. Devuelve el recurso actualizado completo</td></tr><tr><td><code>400 Bad Request</code></td><td>El <code>{id}</code> no es un entero, el JSON está mal formado, el cuerpo está vacío, un tipo no corresponde, hay un campo desconocido, o se envió <code>id</code> en el cuerpo</td></tr><tr><td><code>404 Not Found</code></td><td>No existe ningún título con ese id</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Verbos distintos de <code>GET</code>, <code>PUT</code>, <code>PATCH</code> y <code>DELETE</code>. Header <code>Allow: GET, PUT, PATCH, DELETE</code></td></tr><tr><td><code>409 Conflict</code></td><td>El <code>title</code> y <code>year</code> resultantes ya los usa otro título</td></tr><tr><td><code>413 Payload Too Large</code></td><td>El cuerpo supera los 100 kB</td></tr><tr><td><code>415 Unsupported Media Type</code></td><td>El <code>Content-Type</code> no es <code>application/json</code></td></tr><tr><td><code>422 Unprocessable Entity</code></td><td>El resultado de aplicar el cambio viola una regla de negocio. Por ejemplo, marcar como no visto un título que tiene puntaje cargado</td></tr></tbody></table>
+<hr>
+<h3>4.8. <code>DELETE /api/v1/titles/{id}</code></h3>
+<p><strong>Propósito</strong>: eliminar un título del catálogo.</p>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>204 No Content</code></td><td>El título se eliminó. La respuesta no tiene cuerpo</td></tr><tr><td><code>400 Bad Request</code></td><td>El <code>{id}</code> de la URL no es un número entero</td></tr><tr><td><code>404 Not Found</code></td><td>No existe ningún título con ese id, incluido el caso de repetir un <code>DELETE</code> ya efectuado</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Verbos distintos de <code>GET</code>, <code>PUT</code>, <code>PATCH</code> y <code>DELETE</code>. Header <code>Allow: GET, PUT, PATCH, DELETE</code></td></tr></tbody></table>
+<p><strong>Es idempotente, aunque el segundo pedido devuelva <code>404</code>.</strong> La idempotencia se define sobre el estado del sistema, no sobre el status code: después del primer <code>DELETE</code> el título ya no está, y repetirlo no cambia nada.</p>
+<hr>
+<h3>4.9. <code>GET /api/v1/genres</code></h3>
+<p><strong>Propósito</strong>: listar los géneros presentes en el catálogo con la cantidad de títulos de cada uno, de mayor a menor. Se derivan de los títulos cargados, por eso el recurso es de solo lectura.</p>
+<pre class="lang-json"><code>{ &quot;data&quot;: [ { &quot;name&quot;: &quot;Drama&quot;, &quot;titleCount&quot;: 33 } ] }</code></pre>
+<p>Como un título puede tener hasta 5 géneros, la suma de los conteos es mayor que la cantidad de títulos.</p>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>Siempre</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Cualquier verbo que no sea <code>GET</code>. Header <code>Allow: GET</code></td></tr></tbody></table>
+<hr>
+<h3>4.10. <code>GET /api/v1/directors</code></h3>
+<p><strong>Propósito</strong>: listar los directores presentes en el catálogo con la cantidad de títulos de cada uno, de mayor a menor. También se derivan de los títulos.</p>
+<pre class="lang-json"><code>{ &quot;data&quot;: [ { &quot;name&quot;: &quot;Christopher Nolan&quot;, &quot;titleCount&quot;: 3 } ] }</code></pre>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>Siempre</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Cualquier verbo que no sea <code>GET</code>. Header <code>Allow: GET</code></td></tr></tbody></table>
+<hr>
+<h3>4.11. <code>GET /api/v1/reports/watch-stats</code></h3>
+<p><strong>Propósito</strong>: reporte de estadísticas de visionado. Responde cuánto se vio, cuánto falta, cuántas horas llevó y cuántas quedan, con el desglose entre películas y series. La lista de pendientes viene ordenada de menor a mayor duración, que es por donde conviene empezar.</p>
+<p>Las horas de una serie se calculan como la duración promedio del episodio por la cantidad de episodios: sin esa distinción, una serie de seis temporadas &quot;duraría&quot; 49 minutos y el reporte no diría nada.</p>
+<pre class="lang-json"><code>{
+  &quot;data&quot;: {
+    &quot;summary&quot;: {
+      &quot;totalTitles&quot;: 45,
+      &quot;watched&quot;: 35,
+      &quot;pending&quot;: 10,
+      &quot;completionPct&quot;: 77.78,
+      &quot;watchedHours&quot;: 235.9,
+      &quot;pendingHours&quot;: 180.58,
+      &quot;averageRating&quot;: 8.71
+    },
+    &quot;byType&quot;: [
+      { &quot;type&quot;: &quot;movie&quot;, &quot;total&quot;: 35, &quot;watched&quot;: 28, &quot;pending&quot;: 7, &quot;watchedHours&quot;: 63.18 },
+      { &quot;type&quot;: &quot;series&quot;, &quot;total&quot;: 10, &quot;watched&quot;: 7, &quot;pending&quot;: 3, &quot;watchedHours&quot;: 172.72 }
+    ],
+    &quot;pending&quot;: [ { &quot;id&quot;: 11, &quot;title&quot;: &quot;Taxi Driver&quot;, &quot;type&quot;: &quot;movie&quot;, &quot;year&quot;: 1976, &quot;totalMinutes&quot;: 114 } ]
+  }
+}</code></pre>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>Siempre</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Cualquier verbo que no sea <code>GET</code>. Header <code>Allow: GET</code></td></tr></tbody></table>
+<hr>
+<h3>4.12. <code>GET /api/v1/reports/rating-by-genre</code></h3>
+<p><strong>Propósito</strong>: reporte de puntaje promedio por género, de mayor a menor. Solo entran los títulos puntuados, porque un pendiente no tiene nota, y por eso cada género informa dos conteos distintos: cuántos títulos tiene y cuántos de ellos están puntuados.</p>
+<p>Un título con varios géneros suma en todos, así que <code>genreAssignments</code> es mayor que <code>totalTitles</code>. El campo está explícito en el resumen justamente para que ese número no se lea como un error.</p>
+<pre class="lang-json"><code>{
+  &quot;data&quot;: {
+    &quot;summary&quot;: { &quot;totalTitles&quot;: 45, &quot;genres&quot;: 16, &quot;genreAssignments&quot;: 115 },
+    &quot;genres&quot;: [
+      { &quot;genre&quot;: &quot;History&quot;, &quot;titleCount&quot;: 2, &quot;ratedCount&quot;: 1, &quot;averageRating&quot;: 10 },
+      { &quot;genre&quot;: &quot;Crime&quot;, &quot;titleCount&quot;: 17, &quot;ratedCount&quot;: 10, &quot;averageRating&quot;: 9.3 }
+    ]
+  }
+}</code></pre>
+<p>Un género cuyos títulos estén todos pendientes devuelve <code>averageRating: null</code> y se ordena al final.</p>
+<table><thead><tr><th>Status</th><th>Cuándo ocurre</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>Siempre</td></tr><tr><td><code>405 Method Not Allowed</code></td><td>Cualquier verbo que no sea <code>GET</code>. Header <code>Allow: GET</code></td></tr></tbody></table>
+<hr>
+<h2>5. Tabla resumen</h2>
+<table><thead><tr><th>Verbo</th><th>Ruta</th><th>Propósito</th><th>Status codes posibles</th></tr></thead><tbody><tr><td><code>GET</code></td><td><code>/</code></td><td>Índice de la API</td><td>200, 405</td></tr><tr><td><code>GET</code></td><td><code>/api/v1/health</code></td><td>Estado del servicio</td><td>200, 405</td></tr><tr><td><code>GET</code></td><td><code>/api/v1/titles</code></td><td>Listar títulos</td><td>200, 400, 405</td></tr><tr><td><code>POST</code></td><td><code>/api/v1/titles</code></td><td>Crear un título</td><td>201, 400, 405, 409, 413, 415, 422</td></tr><tr><td><code>GET</code></td><td><code>/api/v1/titles/{id}</code></td><td>Obtener un título</td><td>200, 400, 404, 405</td></tr><tr><td><code>PUT</code></td><td><code>/api/v1/titles/{id}</code></td><td>Reemplazar un título</td><td>200, 400, 404, 405, 409, 413, 415, 422</td></tr><tr><td><code>PATCH</code></td><td><code>/api/v1/titles/{id}</code></td><td>Modificar parcialmente</td><td>200, 400, 404, 405, 409, 413, 415, 422</td></tr><tr><td><code>DELETE</code></td><td><code>/api/v1/titles/{id}</code></td><td>Eliminar un título</td><td>204, 400, 404, 405</td></tr><tr><td><code>GET</code></td><td><code>/api/v1/genres</code></td><td>Listar géneros</td><td>200, 405</td></tr><tr><td><code>GET</code></td><td><code>/api/v1/directors</code></td><td>Listar directores</td><td>200, 405</td></tr><tr><td><code>GET</code></td><td><code>/api/v1/reports/watch-stats</code></td><td>Estadísticas de visionado</td><td>200, 405</td></tr><tr><td><code>GET</code></td><td><code>/api/v1/reports/rating-by-genre</code></td><td>Puntaje promedio por género</td><td>200, 405</td></tr></tbody></table>
+<p>Cualquier ruta no listada devuelve <code>404 Not Found</code>, y cualquier error inesperado devuelve <code>500 Internal Server Error</code>.</p>
+</body>
+</html>
