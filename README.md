@@ -125,7 +125,23 @@ tp-arquitectura-web/
 
 ## 7. Documentación de la API
 
-Versión completa: [`docs/api.md`](docs/api.md). Para el entregable en PDF que pide la actividad del módulo 2, abrir [`docs/api.html`](docs/api.html) en el navegador y usar `Ctrl+P` → *Guardar como PDF*: ese archivo es el mismo documento con estilos de impresión, tamaño A4 y las tablas ajustadas para que no se corten entre páginas.
+El documento vive en tres formatos, todos con el mismo contenido:
+
+| Archivo | Para qué |
+|---|---|
+| [`docs/api.md`](docs/api.md) | fuente, la versión que se edita |
+| [`docs/api.html`](docs/api.html) | versión con estilos de impresión (A4, tablas que no se cortan entre páginas) |
+| [`docs/api.pdf`](docs/api.pdf) | **el entregable** de la actividad del módulo 2. 12 páginas |
+
+El PDF se regenera desde el HTML con WeasyPrint, en un entorno conda aparte para no tocar el `base`:
+
+```bash
+conda create -n tp-docs -c conda-forge weasyprint -y
+```
+
+```bash
+conda run -n tp-docs python -c "from weasyprint import HTML; HTML(filename='docs/api.html').write_pdf('docs/api.pdf')"
+```
 
 **URL base**: `http://localhost:3000`  ·  **Prefijo**: `/api/v1`  ·  **Formato**: JSON (`application/json`)
 
@@ -212,5 +228,5 @@ curl "http://localhost:3000/api/v1/titles?watched=false&limit=5"
 
 | Módulo | Actividad | Dónde está |
 |---|---|---|
-| 1 | Servidor HTTP con el módulo nativo `http` | [`modulo-1/server.js`](modulo-1/server.js) y el informe en [`docs/informe-modulo-1.md`](docs/informe-modulo-1.md) |
-| 2 | Documentación de la API | Sección 7 de este README y [`docs/api.md`](docs/api.md) |
+| 1 | Servidor HTTP con el módulo nativo `http` | [`modulo-1/server.js`](modulo-1/server.js) y el informe en [`docs/informe-modulo-1.pdf`](docs/informe-modulo-1.pdf) |
+| 2 | Documentación de la API | Sección 7 de este README y [`docs/api.pdf`](docs/api.pdf) |

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Informe modulo 1 - Servidor HTTP con Node.js</title>
+<style>
+@page { size: A4; margin: 18mm 16mm; }
+* { box-sizing: border-box; }
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 10.5pt; line-height: 1.5; color: #1a1a1a;
+  max-width: 190mm; margin: 0 auto; padding: 12mm 0;
+}
+h1 { font-size: 20pt; margin: 0 0 4pt; border-bottom: 2px solid #1a1a1a; padding-bottom: 6pt; }
+h2 { font-size: 14pt; margin: 22pt 0 8pt; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 16pt 0 6pt; page-break-after: avoid;
+     background: #f2f2f2; padding: 5pt 7pt; border-left: 3px solid #555; }
+h4 { font-size: 10.5pt; margin: 12pt 0 4pt; page-break-after: avoid; }
+p { margin: 6pt 0; }
+hr { border: 0; border-top: 1px solid #d0d0d0; margin: 16pt 0; }
+ul, ol { margin: 6pt 0; padding-left: 20pt; }
+li { margin: 2pt 0; }
+a { color: #1a1a1a; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: 9pt;
+  background: #f2f2f2; padding: 1pt 3pt; border-radius: 2px;
+}
+pre {
+  background: #f7f7f7; border: 1px solid #e0e0e0; border-radius: 3px;
+  padding: 8pt 10pt; overflow-x: auto; page-break-inside: avoid; margin: 8pt 0;
+}
+pre code { background: none; padding: 0; font-size: 8.5pt; line-height: 1.45; }
+table {
+  border-collapse: collapse; width: 100%; margin: 8pt 0;
+  font-size: 9pt; page-break-inside: avoid;
+}
+th, td { border: 1px solid #ccc; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: #ececec; font-weight: 600; }
+tr:nth-child(even) td { background: #fafafa; }
+@media print { body { padding: 0; } a { text-decoration: none; } }
+</style>
+</head>
+<body>
+<h1>Informe: servidor HTTP con Node.js</h1>
+<p><strong>Actividad individual, módulo 1. Arquitectura Web, Universidad de Palermo, 2do cuatrimestre 2026.</strong> Alumno: junam · Profesor: Ing. Diego Marafetti</p>
+<hr>
+<h2>Entorno y método de instalación</h2>
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Sistema operativo</strong></td><td>Windows 11 Home, versión 10.0.26200</td></tr><tr><td><strong>Método de instalación</strong></td><td>Instalación local del paquete LTS con el gestor de paquetes <code>winget</code> (<code>winget install OpenJS.NodeJS.LTS</code>), sin contenedor Docker</td></tr><tr><td><strong>Versión de Node.js</strong></td><td>v24.19.0 (LTS)</td></tr><tr><td><strong>Versión de npm</strong></td><td>11.17.0</td></tr></tbody></table>
+<p>Se optó por la instalación local en lugar de la dockerizada porque el equipo no tenía Docker instalado y la actividad no lo requiere: el runtime se va a usar durante toda la cursada, así que conviene tenerlo disponible directamente en el sistema. Se usó <code>winget</code> en lugar de bajar el instalador a mano porque resuelve la descarga y la incorporación al <code>PATH</code> en un solo comando.</p>
+<h3>Verificación de la instalación</h3>
+<pre class="lang-text"><code>&gt; node --version
+v24.19.0
+
+&gt; npm --version
+11.17.0</code></pre>
+<hr>
+<h2>Implementación</h2>
+<p>El servidor está en <a href="../modulo-1/server.js"><code>modulo-1/server.js</code></a> y usa <strong>exclusivamente el módulo nativo <code>http</code></strong>, sin Express ni ninguna otra dependencia. Se levanta con:</p>
+<pre class="lang-text"><code>npm run modulo1</code></pre>
+<p>Expone dos rutas:</p>
+<table><thead><tr><th>Verbo y ruta</th><th>Respuesta</th></tr></thead><tbody><tr><td><code>GET /</code></td><td><code>200</code> y el texto <code>Servidor funcionando correctamente</code></td></tr><tr><td><code>POST /archivo</code></td><td><code>200</code> y el texto <code>Bytes recibidos: &lt;n&gt;</code></td></tr><tr><td>cualquier otra</td><td><code>404</code> y el texto <code>Recurso no encontrado</code></td></tr></tbody></table>
+<h3>Decisiones de implementación</h3>
+<p><strong>El ruteo se hace a mano.</strong> Sin framework no hay tabla de rutas: lo único que identifica al pedido son <code>req.method</code> y <code>req.url</code>, y hay que compararlos dentro del callback de <code>http.createServer()</code>.</p>
+<p><strong>El conteo de bytes se acumula por fragmento.</strong> El cuerpo del pedido no llega entero ni de una sola vez: <code>req</code> es un <em>stream</em> legible y el contenido aparece fragmentado en <em>chunks</em> a medida que se recibe. Cada chunk es un <code>Buffer</code>, así que su <code>length</code> ya está en bytes y no en caracteres, que es la razón por la que el conteo funciona igual con contenido binario y con texto.</p>
+<p><strong>La respuesta se emite recién en el evento <code>end</code>.</strong> Contestar dentro del evento <code>data</code> devolvería un conteo parcial, porque en ese momento todavía pueden estar viajando fragmentos. Solo <code>end</code> garantiza que no va a llegar más contenido.</p>
+<p><strong>Se contempla el corte de la conexión.</strong> Si el envío se interrumpe a mitad de camino, el evento <code>error</code> del stream responde <code>400</code> en lugar de devolver un número incompleto como si fuera correcto.</p>
+<p>Este ejercicio es el motivo por el que existe el header <code>Content-Length</code>: el servidor no sabe de antemano cuánto va a recibir, y tiene que contarlo o que se lo digan.</p>
+<hr>
+<h2>Evidencia de prueba</h2>
+<p>Se generó un archivo binario de 2048 bytes y se probaron las dos rutas con <code>curl</code>, más dos casos no contemplados para verificar el <code>404</code>.</p>
+<pre class="lang-text"><code>&gt; curl -s -w &quot;[status: %{http_code}]&quot; http://localhost:3000/
+Servidor funcionando correctamente
+[status: 200]
+
+&gt; curl -s -w &quot;[status: %{http_code}]&quot; -X POST --data-binary &quot;@archivo-prueba.bin&quot; http://localhost:3000/archivo
+Bytes recibidos: 2048
+[status: 200]
+
+&gt; curl -s -w &quot;[status: %{http_code}]&quot; http://localhost:3000/ruta-inexistente
+Recurso no encontrado
+[status: 404]
+
+&gt; curl -s -w &quot;[status: %{http_code}]&quot; -X POST --data &quot;x&quot; http://localhost:3000/
+Recurso no encontrado
+[status: 404]</code></pre>
+<p>El conteo coincide exactamente con el tamaño real del archivo, verificado con <code>(Get-Item archivo-prueba.bin).Length</code> = 2048.</p>
+<h3>Prueba con un archivo grande</h3>
+<p>Con 2 kB el cuerpo entra en un solo fragmento, así que el conteo daría bien incluso con una implementación equivocada. Para verificar que la acumulación por chunks es realmente correcta se repitió la prueba con un archivo de 5.000.000 de bytes, que sí se parte en varios fragmentos:</p>
+<pre class="lang-text"><code>&gt; curl -s -w &quot;[status: %{http_code}]&quot; -X POST --data-binary &quot;@archivo-grande.bin&quot; http://localhost:3000/archivo
+Bytes recibidos: 5000000
+[status: 200]</code></pre>
+<p>Los archivos binarios de prueba están excluidos del repositorio por el <code>.gitignore</code> (<code>*.bin</code>), porque se generan al vuelo y no son código.</p>
+<hr>
+<h2>Dificultades encontradas</h2>
+<p><strong>El <code>PATH</code> no se actualiza en las terminales ya abiertas.</strong> Después de instalar Node con <code>winget</code>, <code>node --version</code> seguía diciendo que el comando no existía. La instalación estaba bien: la variable <code>PATH</code> se modifica a nivel del sistema, pero las sesiones de terminal abiertas antes conservan la copia vieja. Se resuelve abriendo una terminal nueva.</p>
+<p><strong>En Windows PowerShell, <code>curl</code> no es <code>curl</code>.</strong> <code>curl</code> es un alias de <code>Invoke-WebRequest</code>, que tiene otra sintaxis y no acepta <code>--data-binary</code>. Para usar el <code>curl</code> real que viene con Windows hay que invocarlo como <code>curl.exe</code>.</p>
+<p>Ninguna dificultad en la implementación del servidor en sí: la API de streams de <code>req</code> responde tal como está descripta en la documentación de Node.</p>
+</body>
+</html>
