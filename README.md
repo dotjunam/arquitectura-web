@@ -2,7 +2,7 @@
 
 Repositorio único del **Trabajo Práctico Integrador** de Arquitectura Web (Universidad de Palermo, 2do cuatrimestre 2026). Acá vive todo el código de la cursada: el backend, las actividades individuales de cada módulo y, más adelante, el frontend.
 
-- **Alumno**: junam
+- **Alumno**: Juan Manuel Gonzalez Kapnik
 - **Materia**: Arquitectura Web. Prof. Ing. Diego Marafetti
 - **Runtime**: Node.js LTS
 

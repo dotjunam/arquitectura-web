@@ -20,7 +20,7 @@
     "nodejs",
     "universidad-de-palermo"
   ],
-  "author": "junam",
+  "author": "Juan Manuel Gonzalez Kapnik",
   "license": "MIT",
   "dependencies": {
     "express": "^5.1.0"

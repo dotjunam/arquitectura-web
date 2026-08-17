@@ -1,7 +1,7 @@
 # Informe: servidor HTTP con Node.js
 
 **Actividad individual, módulo 1. Arquitectura Web, Universidad de Palermo, 2do cuatrimestre 2026.**
-Alumno: junam · Profesor: Ing. Diego Marafetti
+Alumno: Juan Manuel Gonzalez Kapnik · Profesor: Ing. Diego Marafetti
 
 ---
 

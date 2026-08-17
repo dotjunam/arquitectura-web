@@ -1,7 +1,7 @@
 # Documentación de la API
 
 **Actividad individual, módulo 2. Arquitectura Web, Universidad de Palermo, 2do cuatrimestre 2026.**
-Alumno: junam · Profesor: Ing. Diego Marafetti
+Alumno: Juan Manuel Gonzalez Kapnik · Profesor: Ing. Diego Marafetti
 
 ---
 
