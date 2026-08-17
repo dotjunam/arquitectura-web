@@ -5,110 +5,132 @@
  * repositorio: no hay tabla de reportes ni datos duplicados.
  */
 
-import { productRepository } from '../repositories/product.repository.js';
+import { titleRepository } from '../repositories/title.repository.js';
 
-function round(value, decimals = 4) {
+const TYPES = ['movie', 'series'];
+
+function round(value, decimals = 2) {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
 }
 
+/**
+ * Minutos totales de un titulo.
+ *
+ * Una pelicula dura lo que dura; una serie dura la duracion promedio de su
+ * episodio multiplicada por la cantidad de episodios. Sin esta distincion,
+ * Breaking Bad "duraria" 49 minutos y el reporte no diria nada.
+ */
+function totalMinutes(title) {
+  return title.type === 'series'
+    ? title.runtimeMinutes * (title.episodes ?? 0)
+    : title.runtimeMinutes;
+}
+
 export const reportService = {
   /**
-   * Salud del stock: el reporte que le sirve a quien compra.
-   *
-   * Mira tres cosas distintas, y la tercera es la que duele: un producto en
-   * cero sin nada pedido no se repone solo.
+   * Estadisticas de visionado: cuanto se vio, cuanto falta y cuanto tiempo
+   * llevo. Es el reporte que responde "que veo ahora" y "cuanto debo".
    */
-  stockHealth() {
-    const products = productRepository.findAll();
+  watchStats() {
+    const titles = titleRepository.findAll();
+    const watched = titles.filter((title) => title.watched);
+    const pending = titles.filter((title) => !title.watched);
+    const rated = titles.filter((title) => title.rating !== null);
 
-    const belowReorderLevel = products.filter(
-      (product) => product.unitsInStock < product.reorderLevel,
-    );
-    const outOfStock = products.filter((product) => product.unitsInStock === 0);
-    const outOfStockWithoutOrder = outOfStock.filter((product) => product.unitsOnOrder === 0);
-    const discontinuedWithStock = products.filter(
-      (product) => product.discontinued && product.unitsInStock > 0,
-    );
+    const watchedMinutes = watched.reduce((sum, title) => sum + totalMinutes(title), 0);
+    const pendingMinutes = pending.reduce((sum, title) => sum + totalMinutes(title), 0);
 
-    const toSummary = (product) => ({
-      id: product.id,
-      code: product.code,
-      name: product.name,
-      category: product.category,
-      unitsInStock: product.unitsInStock,
-      unitsOnOrder: product.unitsOnOrder,
-      reorderLevel: product.reorderLevel,
-      supplierName: product.supplierName,
+    const byType = TYPES.map((type) => {
+      const ofType = titles.filter((title) => title.type === type);
+      const watchedOfType = ofType.filter((title) => title.watched);
+      return {
+        type,
+        total: ofType.length,
+        watched: watchedOfType.length,
+        pending: ofType.length - watchedOfType.length,
+        watchedHours: round(
+          watchedOfType.reduce((sum, title) => sum + totalMinutes(title), 0) / 60,
+        ),
+      };
     });
 
     return {
       summary: {
-        totalProducts: products.length,
-        belowReorderLevel: belowReorderLevel.length,
-        outOfStock: outOfStock.length,
-        outOfStockWithoutOrder: outOfStockWithoutOrder.length,
-        discontinuedWithStock: discontinuedWithStock.length,
+        totalTitles: titles.length,
+        watched: watched.length,
+        pending: pending.length,
+        completionPct: titles.length === 0 ? 0 : round((watched.length / titles.length) * 100),
+        watchedHours: round(watchedMinutes / 60),
+        pendingHours: round(pendingMinutes / 60),
+        averageRating:
+          rated.length === 0
+            ? null
+            : round(rated.reduce((sum, title) => sum + title.rating, 0) / rated.length),
       },
-      // Los criticos primero: los que estan en cero y ademas nadie pidio.
-      critical: outOfStockWithoutOrder.map(toSummary).sort((a, b) => a.id - b.id),
-      belowReorderLevel: belowReorderLevel.map(toSummary).sort((a, b) => a.id - b.id),
-      discontinuedWithStock: discontinuedWithStock.map(toSummary).sort((a, b) => a.id - b.id),
+      byType,
+      // Lo pendiente mas corto primero: es por donde conviene empezar.
+      pending: pending
+        .map((title) => ({
+          id: title.id,
+          title: title.title,
+          type: title.type,
+          year: title.year,
+          totalMinutes: totalMinutes(title),
+        }))
+        .sort((a, b) => a.totalMinutes - b.totalMinutes),
     };
   },
 
   /**
-   * Margen por categoria.
+   * Puntaje promedio por genero, de mayor a menor.
    *
-   * Se calcula sobre los totales de la categoria, no como promedio de los
-   * margenes individuales: un producto caro pesa mas que uno barato, y
-   * promediar porcentajes le daria a los dos el mismo peso.
+   * Un titulo con varios generos suma en todos: los generos no son excluyentes,
+   * asi que la suma de los conteos por genero es mayor que el total de titulos.
+   * Solo entran los titulos puntuados, porque un pendiente no tiene nota.
    */
-  marginByCategory() {
-    const products = productRepository.findAll();
+  ratingByGenre() {
+    const titles = titleRepository.findAll();
     const groups = new Map();
 
-    for (const product of products) {
-      const group = groups.get(product.category) ?? {
-        category: product.category,
-        productCount: 0,
-        totalListPrice: 0,
-        totalStandardCost: 0,
-      };
-      group.productCount += 1;
-      group.totalListPrice += product.listPrice;
-      group.totalStandardCost += product.standardCost;
-      groups.set(product.category, group);
+    for (const title of titles) {
+      for (const genre of title.genres) {
+        const group = groups.get(genre) ?? {
+          genre,
+          titleCount: 0,
+          ratedCount: 0,
+          ratingSum: 0,
+        };
+        group.titleCount += 1;
+        if (title.rating !== null) {
+          group.ratedCount += 1;
+          group.ratingSum += title.rating;
+        }
+        groups.set(genre, group);
+      }
     }
 
-    const categories = [...groups.values()]
+    const genres = [...groups.values()]
       .map((group) => ({
-        category: group.category,
-        productCount: group.productCount,
-        totalListPrice: round(group.totalListPrice, 2),
-        totalStandardCost: round(group.totalStandardCost, 2),
-        marginPct:
-          group.totalListPrice === 0
-            ? 0
-            : round(
-                ((group.totalListPrice - group.totalStandardCost) / group.totalListPrice) * 100,
-              ),
+        genre: group.genre,
+        titleCount: group.titleCount,
+        ratedCount: group.ratedCount,
+        averageRating: group.ratedCount === 0 ? null : round(group.ratingSum / group.ratedCount),
       }))
-      .sort((a, b) => b.marginPct - a.marginPct);
-
-    const totalListPrice = products.reduce((sum, product) => sum + product.listPrice, 0);
-    const totalStandardCost = products.reduce((sum, product) => sum + product.standardCost, 0);
+      .sort((a, b) => {
+        if (a.averageRating === null) return 1;
+        if (b.averageRating === null) return -1;
+        return b.averageRating - a.averageRating || b.titleCount - a.titleCount;
+      });
 
     return {
       summary: {
-        totalProducts: products.length,
-        categories: categories.length,
-        overallMarginPct:
-          totalListPrice === 0
-            ? 0
-            : round(((totalListPrice - totalStandardCost) / totalListPrice) * 100),
+        totalTitles: titles.length,
+        genres: genres.length,
+        // Aclarado a proposito: este numero NO tiene que dar igual al total.
+        genreAssignments: genres.reduce((sum, genre) => sum + genre.titleCount, 0),
       },
-      categories,
+      genres,
     };
   },
 };

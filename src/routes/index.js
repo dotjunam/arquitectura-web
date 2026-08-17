@@ -5,8 +5,8 @@ import { Router } from 'express';
 import { catalogController } from '../controllers/catalog.controller.js';
 import { reportController } from '../controllers/report.controller.js';
 import { methodNotAllowed } from '../middlewares/method-not-allowed.js';
-import { productRepository } from '../repositories/product.repository.js';
-import { productRoutes } from './product.routes.js';
+import { titleRepository } from '../repositories/title.repository.js';
+import { titleRoutes } from './title.routes.js';
 
 const router = Router();
 
@@ -17,25 +17,25 @@ router.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     uptimeSeconds: Math.round(process.uptime()),
-    seededProducts: productRepository.count(),
+    seededTitles: titleRepository.count(),
   });
 });
 router.all('/health', readOnly);
 
-router.use('/products', productRoutes);
+router.use('/titles', titleRoutes);
 
-// Categorias y proveedores se derivan de los productos: por eso son de solo
-// lectura, no tienen alta ni baja propia.
-router.get('/categories', catalogController.listCategories);
-router.all('/categories', readOnly);
+// Generos y directores se derivan de los titulos: por eso son de solo lectura,
+// no tienen alta ni baja propia.
+router.get('/genres', catalogController.listGenres);
+router.all('/genres', readOnly);
 
-router.get('/suppliers', catalogController.listSuppliers);
-router.all('/suppliers', readOnly);
+router.get('/directors', catalogController.listDirectors);
+router.all('/directors', readOnly);
 
-router.get('/reports/stock-health', reportController.stockHealth);
-router.all('/reports/stock-health', readOnly);
+router.get('/reports/watch-stats', reportController.watchStats);
+router.all('/reports/watch-stats', readOnly);
 
-router.get('/reports/margin-by-category', reportController.marginByCategory);
-router.all('/reports/margin-by-category', readOnly);
+router.get('/reports/rating-by-genre', reportController.ratingByGenre);
+router.all('/reports/rating-by-genre', readOnly);
 
 export { router as apiRoutes };

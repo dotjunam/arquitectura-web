@@ -2,14 +2,14 @@
 
 import { createApp } from './app.js';
 import { config } from './config/index.js';
-import { productRepository } from './repositories/product.repository.js';
+import { titleRepository } from './repositories/title.repository.js';
 
 const app = createApp();
 
 const server = app.listen(config.port, () => {
   console.log(`API escuchando en http://localhost:${config.port}`);
   console.log(`Prefijo de la API: ${config.apiPrefix}`);
-  console.log(`Productos cargados por el seed: ${productRepository.count()}`);
+  console.log(`Titulos cargados por el seed: ${titleRepository.count()}`);
 });
 
 // Cierre ordenado: se deja de aceptar conexiones nuevas y se esperan las que ya

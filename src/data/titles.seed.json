@@ -1,0 +1,837 @@
+[
+  {
+    "id": 1,
+    "title": "The Shawshank Redemption",
+    "type": "movie",
+    "director": "Frank Darabont",
+    "year": 1994,
+    "genres": [
+      "Drama"
+    ],
+    "runtimeMinutes": 142,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2024-03-02"
+  },
+  {
+    "id": 2,
+    "title": "The Godfather",
+    "type": "movie",
+    "director": "Francis Ford Coppola",
+    "year": 1972,
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 175,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 10,
+    "watchedOn": "2024-01-14"
+  },
+  {
+    "id": 3,
+    "title": "Pulp Fiction",
+    "type": "movie",
+    "director": "Quentin Tarantino",
+    "year": 1994,
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 154,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2024-04-20"
+  },
+  {
+    "id": 4,
+    "title": "The Dark Knight",
+    "type": "movie",
+    "director": "Christopher Nolan",
+    "year": 2008,
+    "genres": [
+      "Action",
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 152,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2024-02-09"
+  },
+  {
+    "id": 5,
+    "title": "Inception",
+    "type": "movie",
+    "director": "Christopher Nolan",
+    "year": 2010,
+    "genres": [
+      "Action",
+      "Sci-Fi",
+      "Thriller"
+    ],
+    "runtimeMinutes": 148,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2024-05-11"
+  },
+  {
+    "id": 6,
+    "title": "Interstellar",
+    "type": "movie",
+    "director": "Christopher Nolan",
+    "year": 2014,
+    "genres": [
+      "Adventure",
+      "Drama",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 169,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2024-06-01"
+  },
+  {
+    "id": 7,
+    "title": "Fight Club",
+    "type": "movie",
+    "director": "David Fincher",
+    "year": 1999,
+    "genres": [
+      "Drama"
+    ],
+    "runtimeMinutes": 139,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2024-07-13"
+  },
+  {
+    "id": 8,
+    "title": "Se7en",
+    "type": "movie",
+    "director": "David Fincher",
+    "year": 1995,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Mystery"
+    ],
+    "runtimeMinutes": 127,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2024-08-24"
+  },
+  {
+    "id": 9,
+    "title": "The Social Network",
+    "type": "movie",
+    "director": "David Fincher",
+    "year": 2010,
+    "genres": [
+      "Biography",
+      "Drama"
+    ],
+    "runtimeMinutes": 120,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2024-09-07"
+  },
+  {
+    "id": 10,
+    "title": "Goodfellas",
+    "type": "movie",
+    "director": "Martin Scorsese",
+    "year": 1990,
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 146,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2024-10-19"
+  },
+  {
+    "id": 11,
+    "title": "Taxi Driver",
+    "type": "movie",
+    "director": "Martin Scorsese",
+    "year": 1976,
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 114,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 12,
+    "title": "The Matrix",
+    "type": "movie",
+    "director": "Lana y Lilly Wachowski",
+    "year": 1999,
+    "genres": [
+      "Action",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 136,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2024-11-02"
+  },
+  {
+    "id": 13,
+    "title": "Blade Runner",
+    "type": "movie",
+    "director": "Ridley Scott",
+    "year": 1982,
+    "genres": [
+      "Sci-Fi",
+      "Thriller"
+    ],
+    "runtimeMinutes": 117,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2024-12-14"
+  },
+  {
+    "id": 14,
+    "title": "Alien",
+    "type": "movie",
+    "director": "Ridley Scott",
+    "year": 1979,
+    "genres": [
+      "Horror",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 117,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-01-11"
+  },
+  {
+    "id": 15,
+    "title": "Gladiator",
+    "type": "movie",
+    "director": "Ridley Scott",
+    "year": 2000,
+    "genres": [
+      "Action",
+      "Adventure",
+      "Drama"
+    ],
+    "runtimeMinutes": 155,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2025-02-08"
+  },
+  {
+    "id": 16,
+    "title": "Jurassic Park",
+    "type": "movie",
+    "director": "Steven Spielberg",
+    "year": 1993,
+    "genres": [
+      "Adventure",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 127,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2025-03-15"
+  },
+  {
+    "id": 17,
+    "title": "Schindler's List",
+    "type": "movie",
+    "director": "Steven Spielberg",
+    "year": 1993,
+    "genres": [
+      "Biography",
+      "Drama",
+      "History"
+    ],
+    "runtimeMinutes": 195,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 18,
+    "title": "Saving Private Ryan",
+    "type": "movie",
+    "director": "Steven Spielberg",
+    "year": 1998,
+    "genres": [
+      "Drama",
+      "War"
+    ],
+    "runtimeMinutes": 169,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-04-05"
+  },
+  {
+    "id": 19,
+    "title": "Parasite",
+    "type": "movie",
+    "director": "Bong Joon-ho",
+    "year": 2019,
+    "genres": [
+      "Comedy",
+      "Drama",
+      "Thriller"
+    ],
+    "runtimeMinutes": 132,
+    "seasons": null,
+    "episodes": null,
+    "language": "ko",
+    "watched": true,
+    "rating": 10,
+    "watchedOn": "2025-05-17"
+  },
+  {
+    "id": 20,
+    "title": "Oldboy",
+    "type": "movie",
+    "director": "Park Chan-wook",
+    "year": 2003,
+    "genres": [
+      "Action",
+      "Drama",
+      "Mystery"
+    ],
+    "runtimeMinutes": 120,
+    "seasons": null,
+    "episodes": null,
+    "language": "ko",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 21,
+    "title": "Spirited Away",
+    "type": "movie",
+    "director": "Hayao Miyazaki",
+    "year": 2001,
+    "genres": [
+      "Animation",
+      "Adventure",
+      "Family"
+    ],
+    "runtimeMinutes": 125,
+    "seasons": null,
+    "episodes": null,
+    "language": "ja",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-06-21"
+  },
+  {
+    "id": 22,
+    "title": "Princess Mononoke",
+    "type": "movie",
+    "director": "Hayao Miyazaki",
+    "year": 1997,
+    "genres": [
+      "Animation",
+      "Adventure",
+      "Fantasy"
+    ],
+    "runtimeMinutes": 134,
+    "seasons": null,
+    "episodes": null,
+    "language": "ja",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 23,
+    "title": "Whiplash",
+    "type": "movie",
+    "director": "Damien Chazelle",
+    "year": 2014,
+    "genres": [
+      "Drama",
+      "Music"
+    ],
+    "runtimeMinutes": 106,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-07-12"
+  },
+  {
+    "id": 24,
+    "title": "La La Land",
+    "type": "movie",
+    "director": "Damien Chazelle",
+    "year": 2016,
+    "genres": [
+      "Comedy",
+      "Drama",
+      "Music"
+    ],
+    "runtimeMinutes": 128,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 7,
+    "watchedOn": "2025-08-02"
+  },
+  {
+    "id": 25,
+    "title": "Mad Max: Fury Road",
+    "type": "movie",
+    "director": "George Miller",
+    "year": 2015,
+    "genres": [
+      "Action",
+      "Adventure",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 120,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2025-09-13"
+  },
+  {
+    "id": 26,
+    "title": "Arrival",
+    "type": "movie",
+    "director": "Denis Villeneuve",
+    "year": 2016,
+    "genres": [
+      "Drama",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 116,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-10-04"
+  },
+  {
+    "id": 27,
+    "title": "Dune",
+    "type": "movie",
+    "director": "Denis Villeneuve",
+    "year": 2021,
+    "genres": [
+      "Adventure",
+      "Drama",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 155,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2025-11-08"
+  },
+  {
+    "id": 28,
+    "title": "Sicario",
+    "type": "movie",
+    "director": "Denis Villeneuve",
+    "year": 2015,
+    "genres": [
+      "Action",
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 121,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 29,
+    "title": "No Country for Old Men",
+    "type": "movie",
+    "director": "Joel y Ethan Coen",
+    "year": 2007,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "runtimeMinutes": 122,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-12-06"
+  },
+  {
+    "id": 30,
+    "title": "The Big Lebowski",
+    "type": "movie",
+    "director": "Joel Coen",
+    "year": 1998,
+    "genres": [
+      "Comedy",
+      "Crime"
+    ],
+    "runtimeMinutes": 117,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 31,
+    "title": "Get Out",
+    "type": "movie",
+    "director": "Jordan Peele",
+    "year": 2017,
+    "genres": [
+      "Horror",
+      "Mystery",
+      "Thriller"
+    ],
+    "runtimeMinutes": 104,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2026-01-10"
+  },
+  {
+    "id": 32,
+    "title": "Everything Everywhere All at Once",
+    "type": "movie",
+    "director": "Daniel Kwan y Daniel Scheinert",
+    "year": 2022,
+    "genres": [
+      "Action",
+      "Adventure",
+      "Comedy"
+    ],
+    "runtimeMinutes": 139,
+    "seasons": null,
+    "episodes": null,
+    "language": "en",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2026-02-14"
+  },
+  {
+    "id": 33,
+    "title": "El secreto de sus ojos",
+    "type": "movie",
+    "director": "Juan Jose Campanella",
+    "year": 2009,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Mystery"
+    ],
+    "runtimeMinutes": 129,
+    "seasons": null,
+    "episodes": null,
+    "language": "es",
+    "watched": true,
+    "rating": 10,
+    "watchedOn": "2026-03-07"
+  },
+  {
+    "id": 34,
+    "title": "Relatos salvajes",
+    "type": "movie",
+    "director": "Damian Szifron",
+    "year": 2014,
+    "genres": [
+      "Comedy",
+      "Drama",
+      "Thriller"
+    ],
+    "runtimeMinutes": 122,
+    "seasons": null,
+    "episodes": null,
+    "language": "es",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2026-04-11"
+  },
+  {
+    "id": 35,
+    "title": "Nueve reinas",
+    "type": "movie",
+    "director": "Fabian Bielinsky",
+    "year": 2000,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "runtimeMinutes": 114,
+    "seasons": null,
+    "episodes": null,
+    "language": "es",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 36,
+    "title": "Breaking Bad",
+    "type": "series",
+    "director": "Vince Gilligan",
+    "year": 2008,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "runtimeMinutes": 49,
+    "seasons": 5,
+    "episodes": 62,
+    "language": "en",
+    "watched": true,
+    "rating": 10,
+    "watchedOn": "2025-02-22"
+  },
+  {
+    "id": 37,
+    "title": "The Sopranos",
+    "type": "series",
+    "director": "David Chase",
+    "year": 1999,
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 55,
+    "seasons": 6,
+    "episodes": 86,
+    "language": "en",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 38,
+    "title": "The Wire",
+    "type": "series",
+    "director": "David Simon",
+    "year": 2002,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "runtimeMinutes": 59,
+    "seasons": 5,
+    "episodes": 60,
+    "language": "en",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 39,
+    "title": "Chernobyl",
+    "type": "series",
+    "director": "Craig Mazin",
+    "year": 2019,
+    "genres": [
+      "Drama",
+      "History",
+      "Thriller"
+    ],
+    "runtimeMinutes": 65,
+    "seasons": 1,
+    "episodes": 5,
+    "language": "en",
+    "watched": true,
+    "rating": 10,
+    "watchedOn": "2025-05-03"
+  },
+  {
+    "id": 40,
+    "title": "Better Call Saul",
+    "type": "series",
+    "director": "Vince Gilligan",
+    "year": 2015,
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "runtimeMinutes": 46,
+    "seasons": 6,
+    "episodes": 63,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-08-30"
+  },
+  {
+    "id": 41,
+    "title": "Dark",
+    "type": "series",
+    "director": "Baran bo Odar",
+    "year": 2017,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Mystery"
+    ],
+    "runtimeMinutes": 53,
+    "seasons": 3,
+    "episodes": 26,
+    "language": "de",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2025-11-22"
+  },
+  {
+    "id": 42,
+    "title": "Stranger Things",
+    "type": "series",
+    "director": "Matt y Ross Duffer",
+    "year": 2016,
+    "genres": [
+      "Drama",
+      "Fantasy",
+      "Horror"
+    ],
+    "runtimeMinutes": 51,
+    "seasons": 4,
+    "episodes": 34,
+    "language": "en",
+    "watched": true,
+    "rating": 7,
+    "watchedOn": "2026-01-24"
+  },
+  {
+    "id": 43,
+    "title": "True Detective",
+    "type": "series",
+    "director": "Nic Pizzolatto",
+    "year": 2014,
+    "genres": [
+      "Crime",
+      "Drama",
+      "Mystery"
+    ],
+    "runtimeMinutes": 55,
+    "seasons": 4,
+    "episodes": 30,
+    "language": "en",
+    "watched": false,
+    "rating": null,
+    "watchedOn": null
+  },
+  {
+    "id": 44,
+    "title": "Arcane",
+    "type": "series",
+    "director": "Christian Linke",
+    "year": 2021,
+    "genres": [
+      "Animation",
+      "Action",
+      "Adventure"
+    ],
+    "runtimeMinutes": 40,
+    "seasons": 2,
+    "episodes": 18,
+    "language": "en",
+    "watched": true,
+    "rating": 9,
+    "watchedOn": "2026-03-21"
+  },
+  {
+    "id": 45,
+    "title": "El Eternauta",
+    "type": "series",
+    "director": "Bruno Stagnaro",
+    "year": 2025,
+    "genres": [
+      "Drama",
+      "Sci-Fi"
+    ],
+    "runtimeMinutes": 45,
+    "seasons": 1,
+    "episodes": 6,
+    "language": "es",
+    "watched": true,
+    "rating": 8,
+    "watchedOn": "2026-05-16"
+  }
+]

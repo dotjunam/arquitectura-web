@@ -1,4 +1,4 @@
-# TP Arquitectura Web: API de catálogo de productos
+# TP Arquitectura Web: API de catálogo de películas y series
 
 Repositorio único del **Trabajo Práctico Integrador** de Arquitectura Web (Universidad de Palermo, 2do cuatrimestre 2026). Acá vive todo el código de la cursada: el backend, las actividades individuales de cada módulo y, más adelante, el frontend.
 
@@ -10,22 +10,26 @@ Repositorio único del **Trabajo Práctico Integrador** de Arquitectura Web (Uni
 
 ## 1. Descripción del backend
 
-El backend expone una **API REST para administrar el catálogo de productos de una distribuidora mayorista de alimentos**.
+El backend expone una **API REST para administrar un catálogo personal de películas y series**.
 
-El problema que resuelve es concreto: quien compra necesita saber **qué productos hay, cuánto stock queda de cada uno y cuáles están por debajo del punto de reposición**, antes de emitir la próxima orden a los proveedores. Hoy esa información vive en una planilla y no se puede consultar desde ningún otro sistema.
+El problema que resuelve es el de cualquiera que acumula títulos por ver en cinco plataformas distintas y termina sin saber qué tiene pendiente: la lista vive repartida entre capturas de pantalla, notas sueltas y la memoria. La API centraliza ese catálogo y permite responder **qué hay, qué falta ver, cuánto tiempo lleva lo pendiente y qué géneros son los que uno realmente puntúa mejor**.
 
 La API permite:
 
-- dar de alta, consultar, modificar y dar de baja productos (**CRUD completo**);
-- filtrar y ordenar el catálogo por categoría, proveedor, estado de discontinuación y nivel de stock;
-- consultar las categorías y los proveedores presentes en el catálogo;
-- obtener dos **reportes** de negocio: salud del stock y margen de ganancia por categoría.
+- dar de alta, consultar, modificar y dar de baja títulos (**CRUD completo**);
+- filtrar el catálogo por tipo, género, director, idioma, estado de visionado, puntaje mínimo y rango de años, con búsqueda por texto, orden y paginado;
+- consultar los géneros y los directores presentes en el catálogo;
+- obtener dos **reportes**: estadísticas de visionado y puntaje promedio por género.
 
-### Origen de los datos
+### Modelo del dominio
 
-El seed carga **45 productos reales** tomados del dataset *Northwind Traders*, la base de ejemplo clásica de una importadora y distribuidora de delicatessen. Son 16 categorías y 10 proveedores.
+El recurso central es el **título**, que puede ser una **película** o una **serie**. La distinción no es cosmética: una serie declara temporadas y episodios y una película no, y el reporte de horas los calcula distinto (una serie dura la duración promedio del episodio por la cantidad de episodios). Esa diferencia es la que sostiene las reglas de negocio de la API.
 
-Al preparar el seed se detectó y corrigió un **defecto de los datos de origen**: dos productos repetían el `product_code` de otro (el id 20 usaba `NWTJP-6` y el id 97 usaba `NWTC-82`). El código sigue el patrón `PREFIJO-<id>` en las 43 filas restantes, y esas dos son las únicas excepciones, así que se trata de un error de carga y no de un código legítimo repetido. Como el modelo declara `code` **único** (devuelve `409 Conflict` ante un duplicado), se normalizaron a `NWTJP-20` y `NWTC-97`. La decisión está acá documentada porque cambia los datos respecto de la fuente.
+### Datos iniciales
+
+El seed carga **45 títulos: 35 películas y 10 series**, con 16 géneros y 31 directores. De esos, 35 figuran como vistos y puntuados, y 10 quedan pendientes, así que los reportes tienen algo que decir apenas se levanta el servidor.
+
+Los datos son de dominio público (título, director, año, género, duración) y se cargaron a mano. Los valores de visionado (`watched`, `rating`, `watchedOn`) son ficticios: sirven para que los reportes tengan sentido. Puede haber imprecisiones menores en duraciones y cantidades de episodios; no afectan al funcionamiento de la API.
 
 ---
 
@@ -48,7 +52,7 @@ npm install
 npm start
 ```
 
-El servidor queda escuchando en `http://localhost:3000` y **carga los 45 productos del seed automáticamente**: no hay que importar nada a mano. El puerto se puede cambiar con la variable de entorno `PORT`.
+El servidor queda escuchando en `http://localhost:3000` y **carga los 45 títulos del seed automáticamente**: no hay que importar nada a mano. El puerto se puede cambiar con la variable de entorno `PORT`.
 
 Para desarrollo, con recarga automática ante cada cambio de archivo:
 
@@ -84,7 +88,7 @@ tp-arquitectura-web/
 │   ├── validators/            validación del cuerpo de los pedidos
 │   ├── middlewares/           Content-Type, 404, 405 y manejo de errores
 │   ├── errors/                error de aplicación con status HTTP asociado
-│   └── data/                  seed de 45 productos
+│   └── data/                  seed de 45 títulos
 ├── scripts/
 │   └── test-api.js            pruebas de los endpoints
 └── docs/
@@ -96,23 +100,26 @@ tp-arquitectura-web/
 
 **Separación en capas.** Un pedido atraviesa `ruta → controlador → servicio → repositorio`, y cada capa tiene una sola responsabilidad. El controlador no sabe de reglas de negocio y el servicio no sabe que existe HTTP: recibe datos y devuelve datos o lanza un error de aplicación. La ventaja concreta es que **el status code lo decide la regla de negocio, no el controlador**, y que se puede cambiar el almacenamiento sin tocar nada más.
 
-**Persistencia en memoria detrás de un repositorio.** El TP admite base de datos o memoria. Se eligió memoria por simplicidad, pero el acceso está encapsulado en `product.repository.js`, así que reemplazarlo por una base real es cambiar un archivo. El costo asumido: **los cambios se pierden al reiniciar** y el estado vuelve al seed.
+**Persistencia en memoria detrás de un repositorio.** El TP admite base de datos o memoria. Se eligió memoria por simplicidad, pero el acceso está encapsulado en `title.repository.js`, así que reemplazarlo por una base real es cambiar un archivo. El costo asumido: **los cambios se pierden al reiniciar** y el estado vuelve al seed.
 
-**Nivel 2 del modelo de madurez de Richardson.** Cada recurso tiene su propia URL (`/products` para la colección, `/products/{id}` para el elemento), el verbo dice qué operación es, y el status code dice qué pasó. No se implementó el nivel 3 (HATEOAS): no hay enlaces en las respuestas más allá del índice de la API en `GET /`.
+**Nivel 2 del modelo de madurez de Richardson.** Cada recurso tiene su propia URL (`/titles` para la colección, `/titles/{id}` para el elemento), el verbo dice qué operación es, y el status code dice qué pasó. No se implementó el nivel 3 (HATEOAS): no hay enlaces en las respuestas más allá del índice de la API en `GET /`.
 
 **Manejo de errores centralizado.** Un único middleware arma todas las respuestas de error, así que el formato es siempre el mismo y ningún error inesperado se escapa filtrando un stack trace al cliente.
 
 **Validación estricta del cuerpo.** Los campos desconocidos se rechazan en vez de ignorarse, para que un error de tipeo en el nombre de un campo no se confunda con un éxito. El `id` mandado en el body también se rechaza: lo asigna el servidor.
 
-**400 y 422 son cosas distintas.** `400` es un problema de forma (falta un campo, el tipo no corresponde, el JSON está roto). `422` es un cuerpo bien formado que viola una regla de negocio, como un costo mayor al precio de lista.
+**400 y 422 son cosas distintas, y acá la diferencia se ve.** `400` es un problema de forma: falta un campo, el tipo no corresponde, el JSON está roto, `2026-02-31` no existe en el calendario. `422` es un cuerpo perfectamente legible que dice algo que el dominio no admite: una película con temporadas, una serie sin episodios, un título puntuado que todavía no se vio.
 
-**405 en lugar de 404 cuando el recurso existe.** Un `DELETE /products` responde `405 Method Not Allowed` con el header `Allow: GET, POST`, y no `404`. El 404 diría que ahí no hay nada, y sí hay: lo que no se puede es hacerle eso.
+**405 en lugar de 404 cuando el recurso existe.** Un `DELETE /titles` responde `405 Method Not Allowed` con el header `Allow: GET, POST`, y no `404`. El 404 diría que ahí no hay nada, y sí hay: lo que no se puede es hacerle eso.
+
+**El control de `Content-Type` va por ruta, no global.** Puesto como middleware global, un `POST` contra un reporte de solo lectura respondía `415` cuando lo correcto es `405`. Se aplica solo en las rutas que reciben cuerpo.
 
 ### Limitaciones conocidas
 
 - No hay autenticación (el TP la declara opcional).
 - No hay frontend todavía: es la etapa siguiente del TP.
 - El estado se pierde al reiniciar, por la persistencia en memoria.
+- Los géneros son texto libre validado por forma, no un catálogo cerrado: nada impide cargar `Sci-Fi` y `Ciencia ficción` como géneros distintos.
 
 ---
 
@@ -128,7 +135,7 @@ Las respuestas exitosas envuelven el resultado en `data`, y las de listado agreg
 
 ```json
 {
-  "data": [ { "id": 1, "code": "NWTB-1", "name": "Northwind Traders Chai" } ],
+  "data": [ { "id": 5, "title": "Inception", "type": "movie", "year": 2010 } ],
   "meta": { "total": 45, "page": 1, "limit": 20, "pages": 3 }
 }
 ```
@@ -138,34 +145,31 @@ Los errores usan siempre la misma forma:
 ```json
 {
   "error": {
-    "status": 400,
-    "code": "BAD_REQUEST",
-    "message": "El cuerpo del pedido tiene campos invalidos.",
-    "details": [ { "field": "listPrice", "message": "es obligatorio" } ]
+    "status": 422,
+    "code": "UNPROCESSABLE_ENTITY",
+    "message": "El titulo no cumple las reglas del catalogo.",
+    "details": [ { "field": "seasons", "message": "una pelicula no tiene temporadas" } ]
   }
 }
 ```
 
-### El recurso Producto
+### El recurso Título
 
 | Campo | Tipo | Obligatorio | Reglas |
 |---|---|---|---|
 | `id` | entero | lo asigna el servidor | no se puede mandar en el body |
-| `code` | texto | sí | único, formato `PREFIJO-NÚMERO` (ej. `NWTB-1`) |
-| `name` | texto | sí | entre 3 y 120 caracteres |
-| `category` | texto | sí | entre 2 y 60 caracteres |
-| `quantityPerUnit` | texto | no | hasta 60 caracteres. Por defecto, vacío |
-| `discontinued` | booleano | no | por defecto `false` |
-| `listPrice` | número | sí | ≥ 0 |
-| `standardCost` | número | sí | ≥ 0 y no mayor que `listPrice` |
-| `unitsInStock` | entero | no | ≥ 0. Por defecto 0 |
-| `unitsOnOrder` | entero | no | ≥ 0. Por defecto 0 |
-| `minimumReorderQuantity` | entero | no | ≥ 0. Por defecto 0 |
-| `estimatedMonthlyDemand` | entero o `null` | no | ≥ 0. Por defecto `null` |
-| `reorderLevel` | entero | no | ≥ 0. Por defecto 0 |
-| `targetLevel` | entero | no | ≥ 0. Por defecto 0 |
-| `supplierId` | entero | sí | ≥ 1 |
-| `supplierName` | texto | sí | entre 2 y 80 caracteres |
+| `title` | texto | sí | entre 1 y 200 caracteres. Junto con `year` no se puede repetir |
+| `type` | texto | sí | `movie` o `series` |
+| `director` | texto | sí | entre 2 y 120 caracteres |
+| `year` | entero | sí | entre 1888 y el año actual más 5 |
+| `genres` | lista de texto | sí | entre 1 y 5 géneros, sin repetir, hasta 40 caracteres cada uno |
+| `runtimeMinutes` | entero | sí | entre 1 y 1000. En una serie es la duración promedio del episodio |
+| `seasons` | entero o `null` | no | entre 1 y 100. Obligatorio en series, prohibido en películas |
+| `episodes` | entero o `null` | no | entre 1 y 10000. Obligatorio en series, prohibido en películas |
+| `language` | texto | no | código ISO de dos letras minúsculas (ej. `es`). Por defecto `en` |
+| `watched` | booleano | no | por defecto `false` |
+| `rating` | entero o `null` | no | entre 1 y 10. Exige `watched: true`. Por defecto `null` |
+| `watchedOn` | texto o `null` | no | fecha `AAAA-MM-DD`, no futura. Exige `watched: true`. Por defecto `null` |
 
 ### Índice de endpoints
 
@@ -173,16 +177,16 @@ Los errores usan siempre la misma forma:
 |---|---|---|---|
 | 1 | `GET` | `/` | Índice de la API |
 | 2 | `GET` | `/api/v1/health` | Estado del servicio |
-| 3 | `GET` | `/api/v1/products` | Listar productos con filtros, orden y paginado |
-| 4 | `POST` | `/api/v1/products` | Crear un producto |
-| 5 | `GET` | `/api/v1/products/{id}` | Obtener un producto |
-| 6 | `PUT` | `/api/v1/products/{id}` | Reemplazar un producto completo |
-| 7 | `PATCH` | `/api/v1/products/{id}` | Modificar parcialmente un producto |
-| 8 | `DELETE` | `/api/v1/products/{id}` | Eliminar un producto |
-| 9 | `GET` | `/api/v1/categories` | Listar categorías con su cantidad de productos |
-| 10 | `GET` | `/api/v1/suppliers` | Listar proveedores con su cantidad de productos |
-| 11 | `GET` | `/api/v1/reports/stock-health` | Reporte de salud del stock |
-| 12 | `GET` | `/api/v1/reports/margin-by-category` | Reporte de margen por categoría |
+| 3 | `GET` | `/api/v1/titles` | Listar títulos con filtros, orden y paginado |
+| 4 | `POST` | `/api/v1/titles` | Crear un título |
+| 5 | `GET` | `/api/v1/titles/{id}` | Obtener un título |
+| 6 | `PUT` | `/api/v1/titles/{id}` | Reemplazar un título completo |
+| 7 | `PATCH` | `/api/v1/titles/{id}` | Modificar parcialmente un título |
+| 8 | `DELETE` | `/api/v1/titles/{id}` | Eliminar un título |
+| 9 | `GET` | `/api/v1/genres` | Listar géneros con su cantidad de títulos |
+| 10 | `GET` | `/api/v1/directors` | Listar directores con su cantidad de títulos |
+| 11 | `GET` | `/api/v1/reports/watch-stats` | Reporte de estadísticas de visionado |
+| 12 | `GET` | `/api/v1/reports/rating-by-genre` | Reporte de puntaje promedio por género |
 
 El detalle completo de cada uno, con parámetros, ejemplos de body y todos los status codes posibles, está en [`docs/api.md`](docs/api.md).
 
@@ -199,7 +203,7 @@ Levanta la aplicación en un puerto libre y verifica el status code y el cuerpo 
 También se puede probar a mano con `curl` mientras el servidor corre:
 
 ```bash
-curl http://localhost:3000/api/v1/products?limit=3
+curl "http://localhost:3000/api/v1/titles?watched=false&limit=5"
 ```
 
 ---

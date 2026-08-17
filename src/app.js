@@ -34,16 +34,16 @@ export function createApp() {
   // Indice de la API: punto de entrada para saber que hay, sin leer la doc.
   app.get('/', (req, res) => {
     res.status(200).json({
-      name: 'TP Arquitectura Web - API de catalogo de productos',
+      name: 'TP Arquitectura Web - API de catalogo de peliculas y series',
       version: '1.0.0',
       documentation: 'docs/api.md',
       endpoints: {
         health: `${config.apiPrefix}/health`,
-        products: `${config.apiPrefix}/products`,
-        categories: `${config.apiPrefix}/categories`,
-        suppliers: `${config.apiPrefix}/suppliers`,
-        stockHealthReport: `${config.apiPrefix}/reports/stock-health`,
-        marginByCategoryReport: `${config.apiPrefix}/reports/margin-by-category`,
+        titles: `${config.apiPrefix}/titles`,
+        genres: `${config.apiPrefix}/genres`,
+        directors: `${config.apiPrefix}/directors`,
+        watchStatsReport: `${config.apiPrefix}/reports/watch-stats`,
+        ratingByGenreReport: `${config.apiPrefix}/reports/rating-by-genre`,
       },
     });
   });

@@ -1,13 +1,13 @@
-/** Controladores de los recursos derivados del catalogo: categorias y proveedores. */
+/** Controladores de los recursos derivados del catalogo: generos y directores. */
 
-import { productService } from '../services/product.service.js';
+import { titleService } from '../services/title.service.js';
 
 export const catalogController = {
-  listCategories(req, res) {
-    res.status(200).json({ data: productService.listCategories() });
+  listGenres(req, res) {
+    res.status(200).json({ data: titleService.listGenres() });
   },
 
-  listSuppliers(req, res) {
-    res.status(200).json({ data: productService.listSuppliers() });
+  listDirectors(req, res) {
+    res.status(200).json({ data: titleService.listDirectors() });
   },
 };

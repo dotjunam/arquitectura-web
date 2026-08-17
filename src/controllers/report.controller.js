@@ -3,11 +3,11 @@
 import { reportService } from '../services/report.service.js';
 
 export const reportController = {
-  stockHealth(req, res) {
-    res.status(200).json({ data: reportService.stockHealth() });
+  watchStats(req, res) {
+    res.status(200).json({ data: reportService.watchStats() });
   },
 
-  marginByCategory(req, res) {
-    res.status(200).json({ data: reportService.marginByCategory() });
+  ratingByGenre(req, res) {
+    res.status(200).json({ data: reportService.ratingByGenre() });
   },
 };

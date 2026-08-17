@@ -1,7 +1,7 @@
 {
   "name": "tp-arquitectura-web",
   "version": "1.0.0",
-  "description": "Trabajo Practico Integrador de Arquitectura Web: API REST de un catalogo de productos",
+  "description": "Trabajo Practico Integrador de Arquitectura Web: API REST de un catalogo de peliculas y series",
   "type": "module",
   "main": "src/server.js",
   "engines": {
