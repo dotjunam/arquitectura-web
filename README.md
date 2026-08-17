@@ -41,8 +41,8 @@ Los datos son de dominio público (título, director, año, género, duración) 
 ## 3. Instalación
 
 ```bash
-git clone https://github.com/<usuario>/tp-arquitectura-web.git
-cd tp-arquitectura-web
+git clone https://github.com/dotjunam/arquitectura-web.git
+cd arquitectura-web
 npm install
 ```
 
