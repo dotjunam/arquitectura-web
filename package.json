@@ -1,0 +1,28 @@
+{
+  "name": "tp-arquitectura-web",
+  "version": "1.0.0",
+  "description": "Trabajo Practico Integrador de Arquitectura Web: API REST de un catalogo de productos",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "modulo1": "node modulo-1/server.js",
+    "test:api": "node scripts/test-api.js"
+  },
+  "keywords": [
+    "http",
+    "rest",
+    "express",
+    "nodejs",
+    "universidad-de-palermo"
+  ],
+  "author": "junam",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
