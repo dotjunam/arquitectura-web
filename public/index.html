@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo de películas y series</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- type="module": el script se difiere solo y puede importar otros archivos. -->
+  <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <h1>Catálogo de películas y series</h1>
+    <nav aria-label="Secciones">
+      <ul>
+        <li><a href="#catalogo" aria-current="page">Catálogo</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="catalogo" aria-labelledby="catalogo-titulo">
+      <div class="section-head">
+        <h2 id="catalogo-titulo">Catálogo</h2>
+        <button type="button" id="new-title" class="primary">Nuevo título</button>
+      </div>
+
+      <form id="filters" class="filters" role="search" aria-label="Filtrar el catálogo">
+        <label>
+          Buscar
+          <input type="search" name="q" placeholder="Título o director">
+        </label>
+        <label>
+          Tipo
+          <select name="type">
+            <option value="">Todos</option>
+            <option value="movie">Películas</option>
+            <option value="series">Series</option>
+          </select>
+        </label>
+        <label>
+          Estado
+          <select name="watched">
+            <option value="">Todos</option>
+            <option value="true">Vistos</option>
+            <option value="false">Pendientes</option>
+          </select>
+        </label>
+        <label>
+          Género
+          <select name="genre">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label>
+          Ordenar por
+          <select name="sort">
+            <option value="id">Orden de carga</option>
+            <option value="title">Título</option>
+            <option value="year">Año</option>
+            <option value="rating">Puntaje</option>
+            <option value="runtimeMinutes">Duración</option>
+          </select>
+        </label>
+        <label>
+          Sentido
+          <select name="order">
+            <option value="asc">Ascendente</option>
+            <option value="desc">Descendente</option>
+          </select>
+        </label>
+        <div class="filters-actions">
+          <button type="submit">Filtrar</button>
+          <button type="reset">Limpiar</button>
+        </div>
+      </form>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <div class="table-wrap">
+        <table>
+          <caption id="table-caption">Títulos del catálogo</caption>
+          <thead>
+            <tr>
+              <th scope="col">Título</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Director</th>
+              <th scope="col">Géneros</th>
+              <th scope="col">Duración</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Puntaje</th>
+              <th scope="col"><span class="visually-hidden">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="titles-body"></tbody>
+        </table>
+      </div>
+
+      <nav class="pagination" aria-label="Paginado">
+        <button type="button" id="prev-page">Anterior</button>
+        <span id="page-info"></span>
+        <button type="button" id="next-page">Siguiente</button>
+      </nav>
+    </section>
+  </main>
+
+  <dialog id="title-dialog" aria-labelledby="form-title">
+    <!-- novalidate: la validacion que vale es la del servidor, y sus errores se muestran campo por campo. -->
+    <form id="title-form" novalidate>
+      <h2 id="form-title">Nuevo título</h2>
+      <p id="form-error" class="form-error" role="alert"></p>
+
+      <fieldset>
+        <legend>Datos del título</legend>
+        <div class="field" data-field="title">
+          <label for="f-title">Título</label>
+          <input id="f-title" name="title" required maxlength="200" aria-describedby="e-title">
+          <small class="field-error" id="e-title"></small>
+        </div>
+        <div class="field" data-field="type">
+          <label for="f-type">Tipo</label>
+          <select id="f-type" name="type" required aria-describedby="e-type">
+            <option value="movie">Película</option>
+            <option value="series">Serie</option>
+          </select>
+          <small class="field-error" id="e-type"></small>
+        </div>
+        <div class="field" data-field="director">
+          <label for="f-director">Director</label>
+          <input id="f-director" name="director" required aria-describedby="e-director">
+          <small class="field-error" id="e-director"></small>
+        </div>
+        <div class="field" data-field="year">
+          <label for="f-year">Año</label>
+          <input id="f-year" name="year" type="number" required aria-describedby="e-year">
+          <small class="field-error" id="e-year"></small>
+        </div>
+        <div class="field" data-field="genres">
+          <label for="f-genres">Géneros</label>
+          <input id="f-genres" name="genres" required aria-describedby="h-genres e-genres">
+          <small class="hint" id="h-genres">Separados por coma, hasta 5. Ej.: Drama, Crime</small>
+          <small class="field-error" id="e-genres"></small>
+        </div>
+        <div class="field" data-field="runtimeMinutes">
+          <label for="f-runtime" id="l-runtime">Duración (minutos)</label>
+          <input id="f-runtime" name="runtimeMinutes" type="number" required aria-describedby="e-runtimeMinutes">
+          <small class="field-error" id="e-runtimeMinutes"></small>
+        </div>
+        <div class="field" data-field="language">
+          <label for="f-language">Idioma</label>
+          <input id="f-language" name="language" maxlength="2" aria-describedby="h-language e-language">
+          <small class="hint" id="h-language">Código ISO de dos letras. Ej.: es</small>
+          <small class="field-error" id="e-language"></small>
+        </div>
+      </fieldset>
+
+      <fieldset id="series-fields">
+        <legend>Datos de la serie</legend>
+        <div class="field" data-field="seasons">
+          <label for="f-seasons">Temporadas</label>
+          <input id="f-seasons" name="seasons" type="number" aria-describedby="e-seasons">
+          <small class="field-error" id="e-seasons"></small>
+        </div>
+        <div class="field" data-field="episodes">
+          <label for="f-episodes">Episodios</label>
+          <input id="f-episodes" name="episodes" type="number" aria-describedby="e-episodes">
+          <small class="field-error" id="e-episodes"></small>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Visionado</legend>
+        <div class="field field-inline" data-field="watched">
+          <input id="f-watched" name="watched" type="checkbox">
+          <label for="f-watched">Ya lo vi</label>
+          <small class="field-error" id="e-watched"></small>
+        </div>
+        <div id="watched-fields">
+          <div class="field" data-field="rating">
+            <label for="f-rating">Puntaje (1 a 10)</label>
+            <input id="f-rating" name="rating" type="number" aria-describedby="e-rating">
+            <small class="field-error" id="e-rating"></small>
+          </div>
+          <div class="field" data-field="watchedOn">
+            <label for="f-watchedOn">Fecha en que lo vi</label>
+            <input id="f-watchedOn" name="watchedOn" type="date" aria-describedby="e-watchedOn">
+            <small class="field-error" id="e-watchedOn"></small>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="dialog-actions">
+        <button type="button" id="cancel-form">Cancelar</button>
+        <button type="submit" class="primary">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

@@ -66,6 +66,22 @@ section('Indice y estado del servicio');
 {
   const root = await request('GET', '/');
   check('GET / responde 200', root.status === 200, `status ${root.status}`);
+  check(
+    'GET / sin preferencia de formato devuelve el indice en JSON',
+    root.payload?.endpoints?.titles === '/api/v1/titles',
+  );
+
+  const page = await request('GET', '/', { headers: { Accept: 'text/html' } });
+  check(
+    'GET / pidiendo HTML devuelve la interfaz',
+    page.status === 200 && page.headers.get('content-type')?.startsWith('text/html'),
+    `status ${page.status}, ${page.headers.get('content-type')}`,
+  );
+  check(
+    'GET / declara que la respuesta depende de Accept',
+    page.headers.get('vary')?.includes('Accept'),
+    page.headers.get('vary') ?? 'sin header Vary',
+  );
 
   const health = await request('GET', '/api/v1/health');
   check('GET /api/v1/health responde 200', health.status === 200, `status ${health.status}`);
