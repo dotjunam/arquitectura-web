@@ -19,7 +19,7 @@ const router = Router();
 function parseTitleId(req, res, next) {
   const raw = req.params.id;
   if (!/^\d+$/.test(raw)) {
-    return next(AppError.badRequest(`El id '${raw}' no es un numero entero valido.`));
+    return next(AppError.badRequest(`El id '${raw}' no es un número entero válido.`));
   }
   req.titleId = Number(raw);
   return next();

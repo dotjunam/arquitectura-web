@@ -15,19 +15,19 @@ const SORTABLE_FIELDS = ['id', 'title', 'year', 'rating', 'runtimeMinutes'];
 function parseBoolean(raw, field) {
   if (raw === 'true') return true;
   if (raw === 'false') return false;
-  throw AppError.badRequest(`El parametro '${field}' solo acepta true o false.`);
+  throw AppError.badRequest(`El parámetro '${field}' solo acepta true o false.`);
 }
 
 function parseInteger(raw, field, { min, max } = {}) {
   const value = Number(raw);
   if (!Number.isInteger(value)) {
-    throw AppError.badRequest(`El parametro '${field}' tiene que ser un numero entero.`);
+    throw AppError.badRequest(`El parámetro '${field}' tiene que ser un número entero.`);
   }
   if (min !== undefined && value < min) {
-    throw AppError.badRequest(`El parametro '${field}' no puede ser menor que ${min}.`);
+    throw AppError.badRequest(`El parámetro '${field}' no puede ser menor que ${min}.`);
   }
   if (max !== undefined && value > max) {
-    throw AppError.badRequest(`El parametro '${field}' no puede ser mayor que ${max}.`);
+    throw AppError.badRequest(`El parámetro '${field}' no puede ser mayor que ${max}.`);
   }
   return value;
 }
@@ -48,19 +48,19 @@ function assertBusinessRules(title) {
     }
   } else {
     if (title.seasons !== null) {
-      details.push({ field: 'seasons', message: 'una pelicula no tiene temporadas' });
+      details.push({ field: 'seasons', message: 'una película no tiene temporadas' });
     }
     if (title.episodes !== null) {
-      details.push({ field: 'episodes', message: 'una pelicula no tiene episodios' });
+      details.push({ field: 'episodes', message: 'una película no tiene episodios' });
     }
   }
 
   // No se puede puntuar ni fechar algo que todavia no se vio.
   if (title.rating !== null && !title.watched) {
-    details.push({ field: 'rating', message: 'no se puede puntuar un titulo no visto' });
+    details.push({ field: 'rating', message: 'no se puede puntuar un título no visto' });
   }
   if (title.watchedOn !== null && !title.watched) {
-    details.push({ field: 'watchedOn', message: 'no se puede fechar un titulo no visto' });
+    details.push({ field: 'watchedOn', message: 'no se puede fechar un título no visto' });
   }
   if (title.watchedOn !== null && title.watchedOn > new Date().toISOString().slice(0, 10)) {
     details.push({ field: 'watchedOn', message: 'no puede ser una fecha futura' });
@@ -68,7 +68,7 @@ function assertBusinessRules(title) {
 
   if (details.length > 0) {
     throw AppError.unprocessableEntity(
-      'El titulo no cumple las reglas del catalogo.',
+      'El título no cumple las reglas del catálogo.',
       details,
     );
   }
@@ -79,7 +79,7 @@ function assertTitleIsFree(title, year, { excludeId } = {}) {
   const existing = titleRepository.findByTitleAndYear(title, year);
   if (existing && existing.id !== excludeId) {
     throw AppError.conflict(
-      `Ya existe '${title}' (${year}) en el catalogo.`,
+      `Ya existe '${title}' (${year}) en el catálogo.`,
       [{ field: 'title', conflictsWith: existing.id }],
     );
   }
@@ -87,14 +87,14 @@ function assertTitleIsFree(title, year, { excludeId } = {}) {
 
 function requireTitle(id) {
   const title = titleRepository.findById(id);
-  if (!title) throw AppError.notFound(`No existe un titulo con id ${id}.`);
+  if (!title) throw AppError.notFound(`No existe un título con id ${id}.`);
   return title;
 }
 
 function runValidation(body, options) {
   const { value, errors } = validateTitle(body, options);
   if (errors.length > 0) {
-    throw AppError.badRequest('El cuerpo del pedido tiene campos invalidos.', errors);
+    throw AppError.badRequest('El cuerpo del pedido tiene campos inválidos.', errors);
   }
   return value;
 }
@@ -107,7 +107,7 @@ export const titleService = {
     if (query.type !== undefined) {
       const type = String(query.type);
       if (type !== 'movie' && type !== 'series') {
-        throw AppError.badRequest("El parametro 'type' solo acepta movie o series.");
+        throw AppError.badRequest("El parámetro 'type' solo acepta movie o series.");
       }
       titles = titles.filter((title) => title.type === type);
     }
@@ -153,7 +153,7 @@ export const titleService = {
     if (query.q !== undefined) {
       const term = String(query.q).trim().toLowerCase();
       if (term.length < 2) {
-        throw AppError.badRequest("El parametro 'q' necesita al menos 2 caracteres.");
+        throw AppError.badRequest("El parámetro 'q' necesita al menos 2 caracteres.");
       }
       titles = titles.filter(
         (title) =>
@@ -164,11 +164,11 @@ export const titleService = {
 
     const sortBy = query.sort ?? 'id';
     if (!SORTABLE_FIELDS.includes(sortBy)) {
-      throw AppError.badRequest(`El parametro 'sort' solo acepta: ${SORTABLE_FIELDS.join(', ')}.`);
+      throw AppError.badRequest(`El parámetro 'sort' solo acepta: ${SORTABLE_FIELDS.join(', ')}.`);
     }
     const order = query.order ?? 'asc';
     if (order !== 'asc' && order !== 'desc') {
-      throw AppError.badRequest("El parametro 'order' solo acepta asc o desc.");
+      throw AppError.badRequest("El parámetro 'order' solo acepta asc o desc.");
     }
 
     const direction = order === 'asc' ? 1 : -1;

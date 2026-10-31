@@ -17,7 +17,7 @@ export function methodNotAllowed(allowedMethods) {
       new AppError(
         405,
         'METHOD_NOT_ALLOWED',
-        `El metodo ${req.method} no esta permitido en este recurso. Metodos aceptados: ${allow}.`,
+        `El método ${req.method} no está permitido en este recurso. Métodos aceptados: ${allow}.`,
       ),
     );
   };

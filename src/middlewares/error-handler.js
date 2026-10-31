@@ -28,7 +28,7 @@ export function errorHandler(err, req, res, next) {
       error: {
         status: 400,
         code: 'MALFORMED_JSON',
-        message: 'El cuerpo del pedido no es JSON valido.',
+        message: 'El cuerpo del pedido no es JSON válido.',
       },
     });
   }
@@ -38,7 +38,7 @@ export function errorHandler(err, req, res, next) {
       error: {
         status: 413,
         code: 'PAYLOAD_TOO_LARGE',
-        message: 'El cuerpo del pedido supera el tamano maximo permitido.',
+        message: 'El cuerpo del pedido supera el tamaño máximo permitido.',
       },
     });
   }
@@ -51,7 +51,7 @@ export function errorHandler(err, req, res, next) {
     error: {
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
-      message: 'Ocurrio un error inesperado en el servidor.',
+      message: 'Ocurrió un error inesperado en el servidor.',
     },
   });
 }

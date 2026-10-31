@@ -163,8 +163,8 @@ Los errores usan siempre la misma forma:
   "error": {
     "status": 422,
     "code": "UNPROCESSABLE_ENTITY",
-    "message": "El titulo no cumple las reglas del catalogo.",
-    "details": [ { "field": "seasons", "message": "una pelicula no tiene temporadas" } ]
+    "message": "El título no cumple las reglas del catálogo.",
+    "details": [ { "field": "seasons", "message": "una película no tiene temporadas" } ]
   }
 }
 ```

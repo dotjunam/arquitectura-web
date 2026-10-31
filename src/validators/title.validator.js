@@ -54,7 +54,7 @@ function checkString(field, rules, raw, errors) {
     return undefined;
   }
   if (rules.pattern && !rules.pattern.test(value)) {
-    errors.push({ field, message: 'no respeta el formato esperado (codigo ISO de dos letras, ej. es)' });
+    errors.push({ field, message: 'no respeta el formato esperado (código ISO de dos letras, ej. es)' });
     return undefined;
   }
   return value;
@@ -62,11 +62,11 @@ function checkString(field, rules, raw, errors) {
 
 function checkNumber(field, rules, raw, errors) {
   if (typeof raw !== 'number' || !Number.isFinite(raw)) {
-    errors.push({ field, message: 'tiene que ser un numero' });
+    errors.push({ field, message: 'tiene que ser un número' });
     return undefined;
   }
   if (rules.type === 'integer' && !Number.isInteger(raw)) {
-    errors.push({ field, message: 'tiene que ser un numero entero' });
+    errors.push({ field, message: 'tiene que ser un número entero' });
     return undefined;
   }
   if (rules.min !== undefined && raw < rules.min) {
@@ -90,19 +90,19 @@ function checkArray(field, rules, raw, errors) {
     return undefined;
   }
   if (raw.length > rules.maxItems) {
-    errors.push({ field, message: `no puede tener mas de ${rules.maxItems} elementos` });
+    errors.push({ field, message: `no puede tener más de ${rules.maxItems} elementos` });
     return undefined;
   }
 
   const items = [];
   for (const item of raw) {
     if (typeof item !== 'string' || item.trim().length === 0) {
-      errors.push({ field, message: 'todos los elementos tienen que ser texto no vacio' });
+      errors.push({ field, message: 'todos los elementos tienen que ser texto no vacío' });
       return undefined;
     }
     const value = item.trim();
     if (value.length > rules.itemMax) {
-      errors.push({ field, message: `ningun elemento puede superar los ${rules.itemMax} caracteres` });
+      errors.push({ field, message: `ningún elemento puede superar los ${rules.itemMax} caracteres` });
       return undefined;
     }
     items.push(value);
