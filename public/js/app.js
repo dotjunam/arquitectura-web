@@ -1,5 +1,6 @@
 /**
  * Pantalla del catalogo: listado con filtros y paginado, y el ABM de titulos.
+ * Al final, la navegacion entre esta pantalla y la de reportes (`reports.js`).
  *
  * Los datos siempre se insertan con `textContent` y nunca con `innerHTML`: un
  * titulo cargado como `<img onerror=...>` se tiene que ver como texto, no
@@ -7,6 +8,7 @@
  */
 
 import { api, ApiError } from './api.js';
+import { loadReports } from './reports.js';
 
 const PAGE_SIZE = 10;
 
@@ -423,5 +425,39 @@ elements.form.addEventListener('submit', submitForm);
 elements.form.elements.type.addEventListener('change', syncConditionalFields);
 elements.form.elements.watched.addEventListener('change', syncConditionalFields);
 
+// ---------------------------------------------------------------------------
+// Navegacion entre pantallas
+// ---------------------------------------------------------------------------
+
+/**
+ * Cada pantalla es una seccion del mismo HTML y se elige con el fragmento de la
+ * URL (`#/catalogo`, `#/reportes`). Cambiar el fragmento no recarga la pagina, y
+ * los botones atras y adelante del navegador funcionan solos.
+ *
+ * La barra despues del `#` es a proposito: si el fragmento coincidiera con el
+ * id de la seccion, el navegador bajaria la pagina hasta ella al mostrarla.
+ */
+const VIEWS = ['catalogo', 'reportes'];
+
+function showView() {
+  const requested = window.location.hash.replace(/^#\/?/, '');
+  const view = VIEWS.includes(requested) ? requested : 'catalogo';
+  for (const name of VIEWS) {
+    document.getElementById(name).hidden = name !== view;
+  }
+  for (const link of document.querySelectorAll('.site-header nav a')) {
+    if (link.hash === `#/${view}`) {
+      link.setAttribute('aria-current', 'page');
+    } else {
+      link.removeAttribute('aria-current');
+    }
+  }
+  window.scrollTo(0, 0);
+  if (view === 'reportes') loadReports();
+}
+
+window.addEventListener('hashchange', showView);
+
 loadGenres();
 loadTitles();
+showView();

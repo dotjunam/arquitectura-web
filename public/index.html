@@ -13,7 +13,8 @@
     <h1>Catálogo de películas y series</h1>
     <nav aria-label="Secciones">
       <ul>
-        <li><a href="#catalogo" aria-current="page">Catálogo</a></li>
+        <li><a href="#/catalogo" aria-current="page">Catálogo</a></li>
+        <li><a href="#/reportes">Reportes</a></li>
       </ul>
     </nav>
   </header>
@@ -101,6 +102,61 @@
         <span id="page-info"></span>
         <button type="button" id="next-page">Siguiente</button>
       </nav>
+    </section>
+
+    <section id="reportes" aria-labelledby="reportes-titulo" hidden>
+      <div class="section-head">
+        <h2 id="reportes-titulo">Reportes</h2>
+      </div>
+      <p id="reports-status" class="status" role="status" aria-live="polite"></p>
+
+      <article class="report" aria-labelledby="watch-stats-titulo">
+        <h3 id="watch-stats-titulo">Estadísticas de visionado</h3>
+
+        <!-- dl: cada indicador es un par nombre y valor. -->
+        <dl id="watch-summary" class="kpis"></dl>
+
+        <div class="progress" aria-hidden="true"><div id="completion-bar"></div></div>
+
+        <div class="table-wrap">
+          <table>
+            <caption>Por tipo de título</caption>
+            <thead>
+              <tr>
+                <th scope="col">Tipo</th>
+                <th scope="col" class="num">Títulos</th>
+                <th scope="col" class="num">Vistos</th>
+                <th scope="col" class="num">Pendientes</th>
+                <th scope="col" class="num">Horas vistas</th>
+              </tr>
+            </thead>
+            <tbody id="by-type-body"></tbody>
+          </table>
+        </div>
+
+        <h4>Pendientes, del más corto al más largo</h4>
+        <ol id="pending-list" class="pending-list"></ol>
+      </article>
+
+      <article class="report" aria-labelledby="rating-titulo">
+        <h3 id="rating-titulo">Puntaje promedio por género</h3>
+        <p id="rating-note" class="muted"></p>
+
+        <div class="table-wrap">
+          <table>
+            <caption>Géneros ordenados de mayor a menor puntaje</caption>
+            <thead>
+              <tr>
+                <th scope="col">Género</th>
+                <th scope="col" class="num">Títulos</th>
+                <th scope="col" class="num">Puntuados</th>
+                <th scope="col">Puntaje promedio</th>
+              </tr>
+            </thead>
+            <tbody id="rating-body"></tbody>
+          </table>
+        </div>
+      </article>
     </section>
   </main>
 

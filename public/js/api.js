@@ -59,4 +59,6 @@ export const api = {
   updateTitle: (id, changes) => request('PATCH', `/titles/${id}`, changes),
   deleteTitle: (id) => request('DELETE', `/titles/${id}`),
   listGenres: () => request('GET', '/genres'),
+  watchStats: () => request('GET', '/reports/watch-stats'),
+  ratingByGenre: () => request('GET', '/reports/rating-by-genre'),
 };
