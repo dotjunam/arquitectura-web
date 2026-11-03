@@ -153,12 +153,18 @@ Ejemplos de un título de cada tipo:
 
 ### 4.1. `GET /`
 
-**Propósito**: índice de la API. Devuelve el nombre, la versión y la lista de rutas disponibles, para que un cliente pueda descubrir el resto sin leer la documentación.
+**Propósito**: punto de entrada de la aplicación. La misma URL tiene dos representaciones y se elige por **negociación de contenido**, según el header `Accept` del pedido:
+
+- un cliente de la API (`Accept: application/json`, o sin preferencia, como `curl`) recibe el **índice de la API**: el nombre, la versión y la lista de rutas disponibles, para descubrir el resto sin leer la documentación;
+- un navegador (`Accept: text/html`) recibe la **interfaz web**.
+
+La respuesta incluye el header `Vary: Accept`, para que un caché no entregue una representación a quien pidió la otra.
 
 | Status | Cuándo ocurre |
 |---|---|
-| `200 OK` | Siempre |
+| `200 OK` | Se pudo entregar alguna de las dos representaciones |
 | `405 Method Not Allowed` | Cualquier verbo que no sea `GET`. Header `Allow: GET` |
+| `406 Not Acceptable` | El `Accept` no admite ni JSON ni HTML |
 
 ---
 
@@ -412,7 +418,7 @@ Un género cuyos títulos estén todos pendientes devuelve `averageRating: null`
 
 | Verbo | Ruta | Propósito | Status codes posibles |
 |---|---|---|---|
-| `GET` | `/` | Índice de la API | 200, 405 |
+| `GET` | `/` | Índice de la API (JSON) o interfaz web (HTML), según `Accept` | 200, 405, 406 |
 | `GET` | `/api/v1/health` | Estado del servicio | 200, 405 |
 | `GET` | `/api/v1/titles` | Listar títulos | 200, 400, 405 |
 | `POST` | `/api/v1/titles` | Crear un título | 201, 400, 405, 409, 413, 415, 422 |

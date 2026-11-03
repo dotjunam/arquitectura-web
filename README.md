@@ -1,6 +1,6 @@
-# TP Arquitectura Web: API de catálogo de películas y series
+# TP Arquitectura Web: catálogo de películas y series
 
-Repositorio único del **Trabajo Práctico Integrador** de Arquitectura Web (Universidad de Palermo, 2do cuatrimestre 2026). Acá vive todo el código de la cursada: el backend, las actividades individuales de cada módulo y, más adelante, el frontend.
+Repositorio único del **Trabajo Práctico Integrador** de Arquitectura Web (Universidad de Palermo, 2do cuatrimestre 2026). Acá vive todo el código de la cursada: el backend, el frontend y las actividades individuales de cada módulo.
 
 - **Alumno**: Juan Manuel Gonzalez Kapnik
 - **Materia**: Arquitectura Web. Prof. Ing. Diego Marafetti
@@ -20,6 +20,13 @@ La API permite:
 - filtrar el catálogo por tipo, género, director, idioma, estado de visionado, puntaje mínimo y rango de años, con búsqueda por texto, orden y paginado;
 - consultar los géneros y los directores presentes en el catálogo;
 - obtener dos **reportes**: estadísticas de visionado y puntaje promedio por género.
+
+### El frontend
+
+Una interfaz web servida por el mismo servidor, con dos pantallas:
+
+- **Catálogo**: listado con búsqueda, filtros por tipo, estado y género, orden y paginado. Desde ahí se dan de alta, se editan, se marcan como vistos o pendientes y se eliminan títulos. Los errores de la API (400, 409, 422) se muestran al lado de cada campo del formulario.
+- **Reportes**: las estadísticas de visionado (totales, horas, porcentaje completado, desglose por tipo y la lista de pendientes) y el puntaje promedio por género, con barras.
 
 ### Modelo del dominio
 
@@ -54,6 +61,11 @@ npm start
 
 El servidor queda escuchando en `http://localhost:3000` y **carga los 45 títulos del seed automáticamente**: no hay que importar nada a mano. El puerto se puede cambiar con la variable de entorno `PORT`.
 
+- **Interfaz web**: abrir `http://localhost:3000` en el navegador.
+- **API**: `http://localhost:3000/api/v1`. Un `curl http://localhost:3000/` devuelve el índice de endpoints en JSON.
+
+No hay paso de compilación: el frontend son archivos estáticos que sirve el mismo Express.
+
 Para desarrollo, con recarga automática ante cada cambio de archivo:
 
 ```bash
@@ -64,7 +76,7 @@ npm run dev
 
 | Script | Qué hace |
 |---|---|
-| `npm start` | Levanta la API en el puerto 3000 |
+| `npm start` | Levanta la aplicación (API e interfaz web) en el puerto 3000 |
 | `npm run dev` | Igual que `start`, pero reinicia solo al guardar un archivo |
 | `npm run modulo1` | Levanta el servidor de la actividad del módulo 1 (módulo nativo `http`) |
 | `npm run test:api` | Corre la batería de pruebas de los endpoints |
@@ -89,6 +101,13 @@ tp-arquitectura-web/
 │   ├── middlewares/           Content-Type, 404, 405 y manejo de errores
 │   ├── errors/                error de aplicación con status HTTP asociado
 │   └── data/                  seed de 45 títulos
+├── public/                    frontend (archivos estáticos, sin compilación)
+│   ├── index.html             la página: catálogo, formulario y reportes
+│   ├── css/styles.css         estilos, con modo claro y oscuro
+│   └── js/
+│       ├── api.js             cliente de la API: único archivo que conoce URLs y verbos
+│       ├── app.js             pantalla del catálogo y navegación entre pantallas
+│       └── reports.js         pantalla de reportes
 ├── scripts/
 │   └── test-api.js            pruebas de los endpoints
 └── docs/
@@ -114,10 +133,25 @@ tp-arquitectura-web/
 
 **El control de `Content-Type` va por ruta, no global.** Puesto como middleware global, un `POST` contra un reporte de solo lectura respondía `415` cuando lo correcto es `405`. Se aplica solo en las rutas que reciben cuerpo.
 
+### Decisiones del frontend
+
+**Vanilla JS servido por el mismo Express.** Para un ABM y dos reportes no hace falta un framework ni un paso de compilación. Al salir del mismo servidor, la interfaz y la API comparten origen, así que no hay que configurar CORS, y un solo `npm start` levanta todo.
+
+**`GET /` con negociación de contenido.** La misma URL entrega la interfaz a un navegador (que pide `text/html`) y el índice JSON a un cliente de la API. Se resuelve con el header `Accept`, y la respuesta declara `Vary: Accept`. Así no cambió ningún contrato de la API.
+
+**Las capas también del lado del cliente.** `public/js/api.js` es el único archivo que conoce URLs, verbos y status codes. Las pantallas llaman a funciones con nombre de dominio (`createTitle`, `watchStats`) y reciben datos o un error con los `details` de la API.
+
+**La validación que vale es la del servidor.** El formulario tiene `novalidate`: no bloquea el envío en el navegador, y los errores que devuelve la API se muestran campo por campo. Ahí se ve en pantalla la diferencia entre un 400 y un 422.
+
+**PUT para editar, PATCH para cambios puntuales.** El formulario de edición manda el recurso entero (reemplazo). El botón "Marcar visto" de la tabla manda solo los campos que cambian.
+
+**Los datos se insertan como texto, nunca como HTML.** Todo lo que viene de la API se escribe con `textContent`: un título que contenga HTML se muestra tal cual y no se ejecuta.
+
+**Navegación por fragmento de URL.** Cada pantalla es una sección del mismo HTML y se elige con `#/catalogo` o `#/reportes`, sin recargar la página. Los botones Atrás y Adelante del navegador funcionan.
+
 ### Limitaciones conocidas
 
 - No hay autenticación (el TP la declara opcional).
-- No hay frontend todavía: es la etapa siguiente del TP.
 - El estado se pierde al reiniciar, por la persistencia en memoria.
 - Los géneros son texto libre validado por forma, no un catálogo cerrado: nada impide cargar `Sci-Fi` y `Ciencia ficción` como géneros distintos.
 
@@ -131,16 +165,12 @@ El documento vive en tres formatos, todos con el mismo contenido:
 |---|---|
 | [`docs/api.md`](docs/api.md) | fuente, la versión que se edita |
 | [`docs/api.html`](docs/api.html) | versión con estilos de impresión (A4, tablas que no se cortan entre páginas) |
-| [`docs/api.pdf`](docs/api.pdf) | **el entregable** de la actividad del módulo 2. 12 páginas |
+| [`docs/api.pdf`](docs/api.pdf) | **el entregable** de la actividad del módulo 2, actualizado con el frontend. 12 páginas |
 
-El PDF se regenera desde el HTML con WeasyPrint, en un entorno conda aparte para no tocar el `base`:
+El PDF se regenera imprimiendo el HTML con Chrome sin interfaz (en Windows, desde `cmd` y en la raíz del repo):
 
-```bash
-conda create -n tp-docs -c conda-forge weasyprint -y
-```
-
-```bash
-conda run -n tp-docs python -c "from weasyprint import HTML; HTML(filename='docs/api.html').write_pdf('docs/api.pdf')"
+```bat
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\api.pdf" "%CD%\docs\api.html"
 ```
 
 **URL base**: `http://localhost:3000`  ·  **Prefijo**: `/api/v1`  ·  **Formato**: JSON (`application/json`)
@@ -191,7 +221,7 @@ Los errores usan siempre la misma forma:
 
 | # | Verbo | Ruta | Propósito |
 |---|---|---|---|
-| 1 | `GET` | `/` | Índice de la API |
+| 1 | `GET` | `/` | Índice de la API (JSON) o interfaz web (HTML), según `Accept` |
 | 2 | `GET` | `/api/v1/health` | Estado del servicio |
 | 3 | `GET` | `/api/v1/titles` | Listar títulos con filtros, orden y paginado |
 | 4 | `POST` | `/api/v1/titles` | Crear un título |
@@ -214,7 +244,7 @@ El detalle completo de cada uno, con parámetros, ejemplos de body y todos los s
 npm run test:api
 ```
 
-Levanta la aplicación en un puerto libre y verifica el status code y el cuerpo de cada endpoint, incluidos los casos de error (400, 404, 405, 409, 415 y 422). No usa dependencias externas: alcanza con el runtime de Node.
+Levanta la aplicación en un puerto libre y verifica el status code y el cuerpo de cada endpoint, incluidos los casos de error (400, 404, 405, 406, 409, 415 y 422). Son 78 pruebas. No usa dependencias externas: alcanza con el runtime de Node.
 
 También se puede probar a mano con `curl` mientras el servidor corre:
 
