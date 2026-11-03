@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 
 import { config } from './config/index.js';
+import { AppError } from './errors/app-error.js';
 import { errorHandler } from './middlewares/error-handler.js';
 import { methodNotAllowed } from './middlewares/method-not-allowed.js';
 import { notFound } from './middlewares/not-found.js';
@@ -57,12 +58,15 @@ export function createApp() {
 
   // `/` tiene dos representaciones y se elige por negociacion de contenido
   // (header `Accept`): un navegador pide HTML y recibe la interfaz; un cliente
-  // de la API recibe el indice en JSON. `res.format` agrega `Vary: Accept` y
-  // responde 406 si no puede ofrecer ninguna de las dos.
-  app.get('/', (req, res) => {
+  // de la API recibe el indice en JSON. `res.format` agrega `Vary: Accept`.
+  // Si no se puede ofrecer ninguna de las dos, `default` responde 406 con el
+  // formato de error de la API (el error propio de Express terminaba en 500).
+  app.get('/', (req, res, next) => {
     res.format({
       json: () => res.status(200).json(apiIndex),
       html: () => res.sendFile('index.html', { root: publicDir }),
+      default: () =>
+        next(AppError.notAcceptable('Este recurso solo se ofrece como JSON o como HTML.')),
     });
   });
   app.all('/', methodNotAllowed(['GET']));

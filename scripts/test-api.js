@@ -83,6 +83,13 @@ section('Indice y estado del servicio');
     page.headers.get('vary') ?? 'sin header Vary',
   );
 
+  const unacceptable = await request('GET', '/', { headers: { Accept: 'image/png' } });
+  check(
+    'GET / pidiendo un formato que no ofrece devuelve 406',
+    unacceptable.status === 406,
+    `status ${unacceptable.status}`,
+  );
+
   const health = await request('GET', '/api/v1/health');
   check('GET /api/v1/health responde 200', health.status === 200, `status ${health.status}`);
   check(

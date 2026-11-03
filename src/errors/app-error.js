@@ -25,6 +25,11 @@ export class AppError extends Error {
     return new AppError(404, 'NOT_FOUND', message);
   }
 
+  /** 406: el cliente pide (header `Accept`) un formato que el servidor no ofrece. */
+  static notAcceptable(message) {
+    return new AppError(406, 'NOT_ACCEPTABLE', message);
+  }
+
   /** 409: el pedido choca contra el estado actual del recurso. */
   static conflict(message, details) {
     return new AppError(409, 'CONFLICT', message, details);
